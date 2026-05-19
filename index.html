@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TKD Academia"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="icon" type="image/png" href="icon-192.png"/>
+<title>TKD Academia</title>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyB0HAqybo2uiRVIK2odh0S-QgbSaBDIlH8",
+  authDomain: "tkd-control-5ae77.firebaseapp.com",
+  projectId: "tkd-control-5ae77",
+  storageBucket: "tkd-control-5ae77.firebasestorage.app",
+  messagingSenderId: "395276448954",
+  appId: "1:395276448954:web:fb14c176da5309e28f7e83"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+window.db = db;
+window.auth = auth;
+window.fsLib = { collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where };
+window.authLib = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile };
+window.firebaseReady = true;
+window.dispatchEvent(new Event("firebase-ready"));
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#f0f0f0;min-height:100vh;overscroll-behavior:none}
+:root{--red:#e63946;--gold:#f4c430;--dark:#0a0a0a;--card:#181818;--card2:#222;--border:#2a2a2a;--muted:#777;--green:#22c55e;--blue:#3b82f6;--purple:#a855f7;--r:14px}
+input:not([type="checkbox"]):not([type="radio"]),select,textarea{font-family:inherit;font-size:15px;background:#111;color:#f0f0f0;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;width:100%;outline:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+input[type="checkbox"],input[type="radio"]{width:22px;height:22px;accent-color:#e63946;cursor:pointer;margin:0;flex-shrink:0}
+label:has(input[type="checkbox"]),label:has(input[type="radio"]){cursor:pointer;padding:6px 0;user-select:none}
+select option{background:#111}
+button{cursor:pointer;font-family:inherit;border:none;outline:none}
+.hidden{display:none!important}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{padding:10px 0 14px;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;border-top:2px solid transparent;font-size:10px;font-weight:600}
+.tab-btn.active{color:var(--red);border-top-color:var(--red)}
+#header{background:#111;position:sticky;top:0;z-index:40;border-bottom:1px solid var(--border);padding:10px 14px}
+.header-inner{display:flex;align-items:center;gap:9px}
+.logo-img{width:40px;height:40px;border-radius:10px;background:#222;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative}
+.logo-img img{width:100%;height:100%;object-fit:cover}
+.logo-img::after{content:'';position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:var(--gold);border-radius:50%;border:2px solid #111}
+#content{padding:14px 14px 88px}
+.card{background:var(--card);border-radius:var(--r);padding:14px 15px;border:1px solid var(--border);margin-bottom:10px}
+.card2{background:var(--card2);border-radius:12px;padding:12px 14px}
+.stats-row{display:grid;gap:9px;margin-bottom:14px}
+.stat-box{background:var(--card);border-radius:12px;padding:13px 10px;border:1px solid var(--border);text-align:center}
+.stat-n{font-size:28px;font-weight:800;line-height:1}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600}
+.tag{display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.btn{border-radius:12px;padding:13px 18px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-bottom:8px;border:none}
+.btn-red{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-gold{background:var(--gold);color:#222}
+.btn-wa{background:#25d366;color:#fff}
+.btn-outline{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-outline-red{background:transparent;color:var(--red);border:1.5px solid var(--red)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.overlay{position:fixed;inset:0;background:#000c;z-index:100;display:flex;align-items:flex-end}
+.modal{background:var(--card);width:100%;max-height:93vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:20px 16px 44px;-webkit-overflow-scrolling:touch}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.mt{font-size:21px;font-weight:800}
+.mc{background:#2a2a2a;border-radius:50%;width:30px;height:30px;color:#aaa;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.item{background:var(--card);border-radius:var(--r);padding:13px 14px;border:1px solid var(--border);margin-bottom:9px;cursor:pointer;display:flex;align-items:center;gap:12px}
+.cin{border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;text-align:center;line-height:1.2;flex-shrink:0}
+.gtabs{display:flex;gap:8px;margin-bottom:14px}
+.gtab{flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:13px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);text-align:center}
+.gtab.active{background:var(--red);color:#fff;border-color:var(--red)}
+.srow{display:flex;gap:8px;margin-bottom:12px}
+.srow input{flex:1}
+.addbtn{background:var(--red);border-radius:11px;padding:0 15px;color:#fff;font-weight:700;font-size:14px;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.popts{display:flex;gap:5px;margin-top:9px}
+.popt{flex:1;padding:8px 3px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid var(--border);background:var(--card2);color:var(--muted);text-align:center;line-height:1.4}
+.pg{background:#22c55e18;color:var(--green);border-color:var(--green)}
+.po{background:#f59e0b18;color:#f59e0b;border-color:#f59e0b}
+.pr{background:#e6394618;color:var(--red);border-color:var(--red)}
+.ebig{font-size:40px;font-weight:800;line-height:1}
+.div{height:1px;background:var(--border);margin:14px 0}
+#sede-bar{background:#0f0f0f;border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#sede-bar::-webkit-scrollbar{display:none}
+.sede-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap;flex-shrink:0}
+.sede-chip.active{background:var(--red);color:#fff;border-color:var(--red)}
+.sede-add{width:32px;height:32px;border-radius:50%;background:var(--card2);border:1.5px dashed var(--border);color:var(--muted);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dias-check{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.dia-btn{padding:8px 12px;border-radius:9px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--card2);color:var(--muted)}
+.dia-btn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.wa-item{background:var(--card);border-radius:var(--r);padding:12px 14px;border:1px solid var(--border);margin-bottom:8px;display:flex;align-items:center;gap:12px}
+#loading-screen{position:fixed;inset:0;background:#0a0a0a;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid #333;border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#sync-bar{height:3px;background:var(--red);position:fixed;top:0;left:0;right:0;z-index:400;opacity:0;transition:opacity .3s}
+#sync-bar.on{opacity:1}
+.toast{position:fixed;bottom:90px;left:14px;right:14px;background:var(--card);border:1px solid var(--green);border-radius:12px;padding:14px;text-align:center;font-weight:700;z-index:500;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Dashboard */
+.dash-hero{background:linear-gradient(135deg,#e63946,#8b1a1a);border-radius:18px;padding:18px;margin-bottom:14px;color:#fff;position:relative;overflow:hidden}
+.dash-hero::before{content:'🥋';position:absolute;right:-20px;top:-10px;font-size:140px;opacity:.12;transform:rotate(-15deg)}
+.dash-hero h2{font-size:14px;font-weight:600;opacity:.9;margin-bottom:6px;position:relative}
+.dash-hero .big{font-size:32px;font-weight:800;line-height:1.1;position:relative}
+.dash-hero .sub{font-size:12px;opacity:.85;margin-top:6px;position:relative}
+.dash-section-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+.dash-section-title::before{content:'';width:3px;height:14px;background:var(--red);border-radius:2px}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.bday-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--border)}
+.bday-item:last-child{border-bottom:none}
+.bday-emoji{font-size:24px}
+.alert-warn{background:#f59e0b15;border-left:3px solid #f59e0b;padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.alert-red{background:#e6394615;border-left:3px solid var(--red);padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.alert-green{background:#22c55e15;border-left:3px solid var(--green);padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+.bar-row .lbl{width:80px;color:var(--muted);font-weight:600;flex-shrink:0}
+.bar-row .bar-bg{flex:1;height:8px;background:#222;border-radius:4px;overflow:hidden}
+.bar-row .bar-fill{height:100%;background:var(--red);border-radius:4px;transition:width .4s}
+.bar-row .val{font-weight:700;width:30px;text-align:right}
+
+/* Burbuja flotante para acciones rápidas */
+.fab-area{position:fixed;bottom:100px;right:14px;z-index:45;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.fab{width:54px;height:54px;border-radius:50%;background:var(--red);color:#fff;font-size:24px;box-shadow:0 4px 14px #e6394666;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer}
+
+/* Drawer menu */
+.drawer-overlay{position:fixed;inset:0;background:#000c;z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:-300px;bottom:0;width:280px;background:#111;z-index:95;transition:left .3s;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)}
+.drawer.on{left:0}
+.drawer-header{padding:24px 18px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#e63946,#8b1a1a)}
+.drawer-header .name{font-weight:800;font-size:17px;color:#fff}
+.drawer-header .sub{font-size:11px;color:#ffffffcc;margin-top:3px}
+.drawer-item{padding:14px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #1a1a1a;color:#f0f0f0;cursor:pointer;font-size:14px;font-weight:600}
+.drawer-item:hover{background:#1a1a1a}
+.drawer-item .ico{font-size:20px;width:24px;text-align:center}
+.drawer-section{padding:14px 18px 4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.cal-head{font-size:10px;font-weight:700;color:var(--muted);text-align:center;padding:6px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative}
+.cal-day.today{border-color:var(--red);border-width:2px}
+.cal-day.has-event{background:#e6394620}
+.cal-day.training{background:#3b82f615}
+.cal-day .num{font-weight:700;font-size:13px}
+.cal-day .ev-dot{width:5px;height:5px;border-radius:50%;background:var(--red);position:absolute;bottom:4px}
+.cal-day.empty{background:transparent;border:none;cursor:default}
+
+/* Mini chart bar */
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:60px;margin-top:8px}
+.mini-bar{flex:1;background:var(--red);border-radius:3px 3px 0 0;min-height:4px;position:relative}
+.mini-bar.low{background:var(--muted)}
+
+/* Currículum / Programa técnico */
+.curr-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.curr-tech{background:var(--card2);border-radius:8px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.curr-tech .ko{color:var(--gold);font-weight:700;font-size:11px}
+.curr-tech .del{background:transparent;color:var(--red);font-size:14px;border:none;padding:4px 8px}
+
+/* Eventos */
+.evt-item{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
+.evt-item.tipo-clase{border-left-color:var(--blue)}
+.evt-item.tipo-torneo{border-left-color:var(--gold)}
+.evt-item.tipo-examen{border-left-color:var(--purple)}
+.evt-item.tipo-seminario{border-left-color:#22c55e}
+.evt-item.tipo-suspension{border-left-color:var(--muted);opacity:.7}
+.evt-date{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.evt-title{font-size:14px;font-weight:700;margin-top:3px}
+.evt-meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN (Login / Registro / Recuperar) -->
+<div id="auth-screen" class="hidden" style="position:fixed;inset:0;background:linear-gradient(135deg,#0a0a0a 0%,#1a0505 100%);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto">
+  <div style="width:100%;max-width:380px;text-align:center">
+    <div style="font-size:64px;margin-bottom:8px">🥋</div>
+    <h1 style="color:#fff;font-size:26px;letter-spacing:2px;margin-bottom:4px;font-weight:800">TKD ACADEMIA</h1>
+    <p style="color:#888;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:30px" id="auth-subtitle">Gestión integral para tu escuela</p>
+
+    <!-- LOGIN -->
+    <div id="auth-login" style="text-align:left">
+      <h2 style="color:#fff;font-size:18px;margin-bottom:18px;text-align:center">Iniciar sesión</h2>
+      <div style="margin-bottom:12px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Email</label>
+        <input type="email" id="login-email" placeholder="tucorreo@ejemplo.cl" autocomplete="email" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div style="margin-bottom:6px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div style="text-align:right;margin-bottom:14px">
+        <a onclick="mostrarAuth('recover')" style="color:#e63946;font-size:12px;cursor:pointer;font-weight:600">¿Olvidaste tu contraseña?</a>
+      </div>
+      <div id="auth-err-login" style="color:#e63946;font-size:12px;text-align:center;min-height:18px;margin-bottom:8px"></div>
+      <button class="btn" onclick="hacerLogin()" style="background:#e63946;color:#fff;width:100%;padding:13px;border-radius:10px;font-weight:700;letter-spacing:1px;font-size:14px;text-transform:uppercase">Ingresar</button>
+      <div style="text-align:center;margin-top:20px;color:#888;font-size:13px">
+        ¿Eres nuevo? <a onclick="mostrarAuth('register')" style="color:#f4c430;cursor:pointer;font-weight:700">Crear cuenta</a>
+      </div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="auth-register" class="hidden" style="text-align:left">
+      <h2 style="color:#fff;font-size:18px;margin-bottom:18px;text-align:center">Crear cuenta</h2>
+      <div style="margin-bottom:12px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Nombre del maestro / instructor</label>
+        <input type="text" id="reg-nombre" placeholder="Tu nombre completo" autocomplete="name" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Nombre de la escuela</label>
+        <input type="text" id="reg-escuela" placeholder="Ej: Dojang Paine" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Email</label>
+        <input type="email" id="reg-email" placeholder="tucorreo@ejemplo.cl" autocomplete="email" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div id="auth-err-register" style="color:#e63946;font-size:12px;text-align:center;min-height:18px;margin-bottom:8px"></div>
+      <button class="btn" onclick="hacerRegistro()" style="background:#e63946;color:#fff;width:100%;padding:13px;border-radius:10px;font-weight:700;letter-spacing:1px;font-size:14px;text-transform:uppercase">Crear cuenta</button>
+      <div style="text-align:center;margin-top:20px;color:#888;font-size:13px">
+        ¿Ya tienes cuenta? <a onclick="mostrarAuth('login')" style="color:#f4c430;cursor:pointer;font-weight:700">Iniciar sesión</a>
+      </div>
+    </div>
+
+    <!-- RECUPERAR CONTRASEÑA -->
+    <div id="auth-recover" class="hidden" style="text-align:left">
+      <h2 style="color:#fff;font-size:18px;margin-bottom:8px;text-align:center">Recuperar contraseña</h2>
+      <p style="color:#888;font-size:12px;text-align:center;margin-bottom:18px">Te enviaremos un enlace a tu email para crear una nueva contraseña</p>
+      <div style="margin-bottom:14px">
+        <label style="color:#aaa;font-size:12px;display:block;margin-bottom:6px">Email registrado</label>
+        <input type="email" id="rec-email" placeholder="tucorreo@ejemplo.cl" autocomplete="email" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#fff"/>
+      </div>
+      <div id="auth-err-recover" style="font-size:12px;text-align:center;min-height:18px;margin-bottom:8px"></div>
+      <button class="btn" onclick="hacerRecuperar()" style="background:#e63946;color:#fff;width:100%;padding:13px;border-radius:10px;font-weight:700;letter-spacing:1px;font-size:14px;text-transform:uppercase">Enviar enlace</button>
+      <div style="text-align:center;margin-top:20px;color:#888;font-size:13px">
+        <a onclick="mostrarAuth('login')" style="color:#f4c430;cursor:pointer;font-weight:700">← Volver al login</a>
+      </div>
+    </div>
+
+    <div style="margin-top:30px;color:#555;font-size:10px;letter-spacing:1px;text-transform:uppercase">v 2.0 · Multi-escuela</div>
+  </div>
+</div>
+
+<div id="loading-screen">
+  <div style="font-size:52px">🥋</div>
+  <div class="spinner"></div>
+  <div style="color:var(--muted);font-size:14px">Conectando con la nube...</div>
+</div>
+
+<div id="sync-bar"></div>
+
+<!-- DRAWER MENU -->
+<div class="drawer-overlay" id="drawer-ov" onclick="cerrarDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="name" id="dr-name">TKD Academia</div>
+    <div class="sub" id="dr-sub">cargando...</div>
+  </div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('dashboard')"><span class="ico">📊</span> Inicio / Dashboard</div>
+
+  <div class="drawer-section">Gestión</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('curriculum')"><span class="ico">📚</span> Programa técnico</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('calendario')"><span class="ico">📅</span> Calendario y eventos</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('competencias')"><span class="ico">🏆</span> Competencias</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('torneos')"><span class="ico">🥋</span> Torneos (inscripciones)</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('comunicados')"><span class="ico">📢</span> Comunicados</div>
+  <div class="drawer-item" onclick="cerrarDrawer();goTab('inscripciones')"><span class="ico">📝</span> Inscripciones <span id="badge-pendientes" style="margin-left:auto;background:#e63946;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;display:none">0</span></div>
+  <div class="drawer-item" onclick="cerrarDrawer();modalLinkInscripcion()"><span class="ico">🔗</span> Generar link de inscripción</div>
+
+  <div class="drawer-section">Configuración</div>
+  <div class="drawer-item" onclick="cerrarDrawer();modalEditarSede(sedeId)"><span class="ico">🏢</span> Sede actual</div>
+  <div class="drawer-item" onclick="cerrarDrawer();modalMiCuenta()"><span class="ico">👤</span> Mi cuenta</div>
+  <div class="drawer-item" onclick="cerrarDrawer();modalPlanes()"><span class="ico">💎</span> Planes de suscripción</div>
+  <div class="drawer-item" onclick="cerrarDrawer();modalRespaldo()"><span class="ico">💾</span> Respaldo / Restaurar</div>
+  <div class="drawer-item" onclick="cerrarDrawer();exportarExcel()"><span class="ico">📗</span> Exportar a Excel</div>
+  <div class="drawer-item" onclick="cerrarDrawer();cerrarSesion()"><span class="ico">🚪</span> Cerrar sesión</div>
+</div>
+
+<div id="header">
+  <div class="header-inner">
+    <div class="logo-img" id="logo-box" onclick="abrirDrawer()">
+      <span id="logo-emoji">🥋</span>
+      <img id="logo-img-el" style="display:none"/>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="escuela-nombre">TKD Academia</div>
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">
+        <span id="header-sub">cargando...</span>
+        <span style="color:var(--green)">☁️ Nube</span>
+      </div>
+    </div>
+    <button onclick="exportarExcel()" style="background:#22c55e;border-radius:10px;padding:8px 11px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;flex-shrink:0">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Excel
+    </button>
+  </div>
+</div>
+
+<div id="sede-bar"></div>
+<div id="content"></div>
+
+<nav id="bottom-nav">
+  <button class="tab-btn active" onclick="goTab('alumnos')" id="tab-alumnos">
+    <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Alumnos
+  </button>
+  <button class="tab-btn" onclick="goTab('asistencia')" id="tab-asistencia">
+    <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6H3v14h14v-5"/><polyline points="9 11 12 14 22 4"/></svg>
+    Asistencia
+  </button>
+  <button class="tab-btn" onclick="goTab('pagos')" id="tab-pagos">
+    <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Pagos
+  </button>
+  <button class="tab-btn" onclick="goTab('examenes')" id="tab-examenes">
+    <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="11"/><path d="M7 4h10l-1 7H8L7 4z"/><path d="M7 4H4v3a3 3 0 0 0 3 3"/><path d="M17 4h3v3a3 3 0 0 1-3 3"/></svg>
+    Examenes
+  </button>
+  <button class="tab-btn" onclick="goTab('calendario')" id="tab-calendario">
+    <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Calendario
+  </button>
+</nav>
+
+<div class="overlay hidden" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mh">
+      <div class="mt" id="modal-title"></div>
+      <button class="mc" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// Service worker for PWA
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){});});}
+
+// ── CONSTANTES ──────────────────────────────────────────────────────────────
+const CIN=["Blanco","Blanco-Amarillo","Amarillo","Amarillo-Verde","Verde","Verde-Azul","Azul","Azul-Rojo","Rojo","Rojo-Negro","Negro 1er Dan","Negro 2do Dan","Negro 3er Dan","Negro 4to Dan","Negro 5to Dan","Negro 6to Dan","Negro 7mo Dan","Negro 8vo Dan"];
+const CIN_BG={"Blanco":"#e8e8e8","Blanco-Amarillo":"#f0d060","Amarillo":"#f4c430","Amarillo-Verde":"#a8c830","Verde":"#22c55e","Verde-Azul":"#1a9e7a","Azul":"#3b82f6","Azul-Rojo":"#7040c0","Rojo":"#e63946","Rojo-Negro":"#8b1a1a","Negro 1er Dan":"#1a1a1a","Negro 2do Dan":"#1a1a1a","Negro 3er Dan":"#1a1a1a","Negro 4to Dan":"#1a1a1a","Negro 5to Dan":"#1a1a1a","Negro 6to Dan":"#1a1a1a","Negro 7mo Dan":"#1a1a1a","Negro 8vo Dan":"#1a1a1a"};
+const CIN_FG={"Blanco":"#333","Blanco-Amarillo":"#333","Amarillo":"#333","Amarillo-Verde":"#fff","Verde":"#fff","Verde-Azul":"#fff","Azul":"#fff","Azul-Rojo":"#fff","Rojo":"#fff","Rojo-Negro":"#fff","Negro 1er Dan":"#ffd700","Negro 2do Dan":"#ffd700","Negro 3er Dan":"#ffd700","Negro 4to Dan":"#ffd700","Negro 5to Dan":"#ffd700","Negro 6to Dan":"#ffd700","Negro 7mo Dan":"#ffd700","Negro 8vo Dan":"#ffd700"};
+const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DIAS_SEMANA=["Lun","Mar","Mie","Jue","Vie","Sab","Dom"];
+const TIPOS_EVENTO=["Clase","Examen","Torneo","Seminario","Suspension","Otro"];
+const CAT_TECNICAS=["Poomsae","Pateadas","Manos","Defensa","Termino coreano","Teoria","Rompimiento","Combate"];
+const HOY=new Date().toISOString().slice(0,10);
+const MES=new Date().getMonth();
+const ANO=new Date().getFullYear();
+const AEST_RAW=["P","A","T","J"];
+const AEST_EMOJI=["✅","❌","⚠️","🩺"];
+const ALBL=["Presente","Ausente","Tardanza","Justificado"];
+const ACOL=["#22c55e","#e63946","#f59e0b","#3b82f6"];
+
+// Requisitos default por cinturón (meses en grado + asistencia mínima %)
+const REQ_DEFAULT={
+  "Blanco":{meses:3,asist:70},
+  "Blanco-Amarillo":{meses:3,asist:70},
+  "Amarillo":{meses:3,asist:70},
+  "Amarillo-Verde":{meses:3,asist:70},
+  "Verde":{meses:4,asist:75},
+  "Verde-Azul":{meses:4,asist:75},
+  "Azul":{meses:4,asist:75},
+  "Azul-Rojo":{meses:4,asist:75},
+  "Rojo":{meses:6,asist:80},
+  "Rojo-Negro":{meses:6,asist:80},
+  "Negro 1er Dan":{meses:18,asist:85},
+  "Negro 2do Dan":{meses:24,asist:85},
+  "Negro 3er Dan":{meses:36,asist:85},
+  "Negro 4to Dan":{meses:48,asist:85},
+  "Negro 5to Dan":{meses:60,asist:85},
+  "Negro 6to Dan":{meses:72,asist:85},
+  "Negro 7mo Dan":{meses:84,asist:85},
+  "Negro 8vo Dan":{meses:96,asist:85}
+};
+
+// ── ESTADO GLOBAL ───────────────────────────────────────────────────────────
+let tab="dashboard",grupo="ninos",asisFecha=HOY;
+let pagoMes=MES,pagoAno=ANO,pagoGrupo="ninos",examGrupo="ninos",asisGrupo="ninos";
+let calMes=MES,calAno=ANO,compGrupo="ninos";
+let sedes=[],sedeId="",logoDataUrl="",diasSel=[];
+let DB={alumnos:[],asistencia:{},pagos:{},examenes:[],eventos:[],competencias:[],torneos:[],curriculum:{},config:{}};
+let db,fsLib,auth,authLib;
+let currentUser=null,pendingNewUser=null;
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function sync(on){var b=document.getElementById("sync-bar");if(on)b.classList.add("on");else b.classList.remove("on");}
+// Parsea fecha YYYY-MM-DD sin afectarse por zona horaria
+function parseFecha(s){
+  if(!s)return null;
+  // Si viene como YYYY-MM-DD, parseamos manual (evita UTC shift)
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return new Date(+m[1],+m[2]-1,+m[3]); // mes 0-indexado
+  return new Date(s);
+}
+function edad(nac){
+  if(!nac)return"?";
+  var d=parseFecha(nac);if(!d)return"?";
+  var h=new Date();
+  return h.getFullYear()-d.getFullYear()-(h<new Date(h.getFullYear(),d.getMonth(),d.getDate())?1:0);
+}
+
+// Categorías de peso oficiales World Taekwondo (Olímpicas y de Federación)
+function categoriaPeso(pesoKg,edadAnios,grupo){
+  if(!pesoKg||pesoKg<=0)return"-";
+  var p=parseFloat(pesoKg);
+  var ed=parseInt(edadAnios)||0;
+
+  // CADETES (12-14 años)
+  if(grupo==="ninos"&&ed>=12&&ed<=14){
+    if(p<=33)return"-33 kg";
+    if(p<=37)return"-37 kg";
+    if(p<=41)return"-41 kg";
+    if(p<=45)return"-45 kg";
+    if(p<=49)return"-49 kg";
+    if(p<=53)return"-53 kg";
+    if(p<=57)return"-57 kg";
+    if(p<=61)return"-61 kg";
+    if(p<=65)return"-65 kg";
+    return"+65 kg";
+  }
+  // INFANTILES (menores 12)
+  if(grupo==="ninos"||ed<12){
+    if(p<=20)return"-20 kg";
+    if(p<=23)return"-23 kg";
+    if(p<=26)return"-26 kg";
+    if(p<=29)return"-29 kg";
+    if(p<=32)return"-32 kg";
+    if(p<=36)return"-36 kg";
+    if(p<=40)return"-40 kg";
+    if(p<=44)return"-44 kg";
+    return"+44 kg";
+  }
+  // JUVENILES (15-17 años)
+  if(ed>=15&&ed<=17){
+    if(p<=45)return"-45 kg";
+    if(p<=48)return"-48 kg";
+    if(p<=51)return"-51 kg";
+    if(p<=55)return"-55 kg";
+    if(p<=59)return"-59 kg";
+    if(p<=63)return"-63 kg";
+    if(p<=68)return"-68 kg";
+    if(p<=73)return"-73 kg";
+    if(p<=78)return"-78 kg";
+    return"+78 kg";
+  }
+  // ADULTOS / SENIORS (18+)
+  if(p<=54)return"-54 kg";
+  if(p<=58)return"-58 kg";
+  if(p<=63)return"-63 kg";
+  if(p<=68)return"-68 kg";
+  if(p<=74)return"-74 kg";
+  if(p<=80)return"-80 kg";
+  if(p<=87)return"-87 kg";
+  return"+87 kg";
+}
+function tag(txt,color){return'<span class="tag" style="background:'+color+'20;color:'+color+';border:1px solid '+color+'40">'+txt+'</span>';}
+function cinBadge(c,sz){
+  sz=sz||42;var bg=CIN_BG[c]||"#333",fg=CIN_FG[c]||"#fff",label=c||"?";
+  if(label.indexOf("-")>-1){var p=label.split("-");label=p[0].slice(0,3)+"/"+p[1].slice(0,3);}
+  else if(label.indexOf(" ")>-1){var p=label.split(" ");label=p[0].slice(0,3)+(p[2]?"\n"+p[1]+" "+p[2]:p[1]?"\n"+p[1]:"");}
+  else label=label.slice(0,3);
+  return'<div class="cin" style="width:'+sz+'px;height:'+sz+'px;background:'+bg+';color:'+fg+'">'+label.toUpperCase()+'</div>';
+}
+function cinColor(c){return CIN_BG[c]||"#333";}
+function cinSel(id,val){return'<select id="'+id+'">'+CIN.map(function(c){return'<option'+(c===val?' selected':'')+'>'+c+'</option>';}).join('')+'</select>';}
+function estadoCol(e){return e==="Activo"?"#22c55e":e==="Inactivo"?"#f59e0b":"#e63946";}
+function limpiarTel(t){return(t||"").replace(/\D/g,"");}
+function sedeActual(){return sedes.find(function(s){return s.id===sedeId;})||sedes[0]||{};}
+function openModal(t,h){document.getElementById("modal-title").innerHTML=t;document.getElementById("modal-body").innerHTML=h;document.getElementById("modal").classList.remove("hidden");}
+function closeModal(){document.getElementById("modal").classList.add("hidden");}
+function toast(msg,color){
+  color=color||"#22c55e";
+  var t=document.createElement("div");t.className="toast";t.style.borderColor=color;t.style.color=color;t.textContent=msg;
+  document.body.appendChild(t);setTimeout(function(){t.remove();},2400);
+}
+function abrirDrawer(){document.getElementById("drawer").classList.add("on");document.getElementById("drawer-ov").classList.add("on");}
+function cerrarDrawer(){document.getElementById("drawer").classList.remove("on");document.getElementById("drawer-ov").classList.remove("on");}
+function updateHeader(){
+  var s=sedeActual();
+  document.getElementById("escuela-nombre").textContent=s.nombre||"TKD Academia";
+  document.getElementById("dr-name").textContent=s.nombre||"TKD Academia";
+  var act=DB.alumnos.filter(function(a){return a.estado==="Activo";}).length;
+  document.getElementById("header-sub").textContent=DB.alumnos.length+" alumnos - "+act+" activos";
+  document.getElementById("dr-sub").textContent=DB.alumnos.length+" alumnos - "+act+" activos";
+  var emoji=document.getElementById("logo-emoji"),img=document.getElementById("logo-img-el");
+  if(s.logo){emoji.style.display="none";img.src=s.logo;img.style.display="block";}
+  else{emoji.style.display="";img.style.display="none";}
+}
+function mesesEntre(d1,d2){if(!d1||!d2)return 0;var a=new Date(d1),b=new Date(d2);return(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());}
+function diasEntre(d1,d2){if(!d1||!d2)return 0;return Math.round((new Date(d2)-new Date(d1))/(1000*60*60*24));}
+
+// ── FIREBASE ────────────────────────────────────────────────────────────────
+async function fsSet(col,id,data){
+  // Si la suscripción venció, bloquear escrituras EXCEPTO para suscripcion y escuelas_publicas
+  if(userSub&&!suscripcionVigente()){
+    var esExcepcion=col.indexOf("escuelas_publicas")===0||(col.indexOf("/meta")>-1&&id==="suscripcion");
+    if(!esExcepcion){
+      mostrarModalExpirado();
+      throw new Error("Suscripción expirada - operación bloqueada");
+    }
+  }
+  sync(true);await fsLib.setDoc(fsLib.doc(db,col,id),data);sync(false);
+}
+async function fsGetAll(col){var snap=await fsLib.getDocs(fsLib.collection(db,col));var r=[];snap.forEach(function(d){r.push(Object.assign({id:d.id},d.data()));});return r;}
+async function fsDel(col,id){
+  if(userSub&&!suscripcionVigente()){
+    mostrarModalExpirado();
+    throw new Error("Suscripción expirada - operación bloqueada");
+  }
+  await fsLib.deleteDoc(fsLib.doc(db,col,id));
+}
+async function fsGetDoc(col,id){var d=await fsLib.getDoc(fsLib.doc(db,col,id));return d.exists()?d.data():null;}
+
+function pref(){return"escuelas/"+(currentUser?currentUser.uid:"_none")+"/s_"+sedeId+"_";}
+async function cargarTodo(){
+  if(!sedeId)return;
+  var p=pref();
+  var res=await Promise.all([
+    fsGetAll(p+"alumnos"),
+    fsGetAll(p+"examenes"),
+    fsGetAll(p+"eventos"),
+    fsGetAll(p+"competencias"),
+    fsGetAll(p+"torneos"),
+    fsGetDoc(p+"meta","asistencia"),
+    fsGetDoc(p+"meta","pagos"),
+    fsGetDoc(p+"meta","curriculum"),
+    fsGetDoc(p+"meta","config")
+  ]);
+  DB.alumnos=res[0];DB.examenes=res[1];DB.eventos=res[2];DB.competencias=res[3];DB.torneos=res[4]||[];
+  DB.asistencia=res[5]||{};DB.pagos=res[6]||{};
+  DB.curriculum=res[7]||{};DB.config=res[8]||{};
+}
+async function saveTorneo(t){await fsSet(pref()+"torneos",t.id,t);}
+async function delTorneo(id){await fsDel(pref()+"torneos",id);}
+async function saveAsistencia(){await fsSet(pref()+"meta","asistencia",DB.asistencia);}
+async function savePagos(){await fsSet(pref()+"meta","pagos",DB.pagos);}
+async function saveAlumno(a){await fsSet(pref()+"alumnos",a.id,a);}
+async function delAlumno(id){await fsDel(pref()+"alumnos",id);}
+async function saveExamen(ex){await fsSet(pref()+"examenes",ex.id,ex);}
+async function delExamen(id){await fsDel(pref()+"examenes",id);}
+async function saveEvento(ev){await fsSet(pref()+"eventos",ev.id,ev);}
+async function delEvento(id){await fsDel(pref()+"eventos",id);}
+async function saveCompetencia(co){await fsSet(pref()+"competencias",co.id,co);}
+async function delCompetencia(id){await fsDel(pref()+"competencias",id);}
+async function saveCurriculum(){await fsSet(pref()+"meta","curriculum",DB.curriculum);}
+async function saveConfig(){await fsSet(pref()+"meta","config",DB.config);}
+async function saveSedes(){await fsSet("escuelas/"+currentUser.uid+"/meta","sedes",{lista:sedes});}
+async function getSedes(){return(await fsGetDoc("escuelas/"+currentUser.uid+"/meta","sedes"))||{};}
+
+// ── AUTH (Firebase Authentication) ──────────────────────────────────────────
+function mostrarAuth(modo){
+  document.getElementById("auth-screen").classList.remove("hidden");
+  document.getElementById("auth-login").classList.add("hidden");
+  document.getElementById("auth-register").classList.add("hidden");
+  document.getElementById("auth-recover").classList.add("hidden");
+  document.getElementById("auth-err-login").textContent="";
+  document.getElementById("auth-err-register").textContent="";
+  document.getElementById("auth-err-recover").textContent="";
+  document.getElementById("auth-err-recover").style.color="#e63946";
+  if(modo==="login")document.getElementById("auth-login").classList.remove("hidden");
+  else if(modo==="register")document.getElementById("auth-register").classList.remove("hidden");
+  else if(modo==="recover")document.getElementById("auth-recover").classList.remove("hidden");
+}
+
+function traducirErrorAuth(code){
+  var t={
+    "auth/invalid-email":"Email inválido",
+    "auth/user-disabled":"Esta cuenta está deshabilitada",
+    "auth/user-not-found":"No existe una cuenta con ese email",
+    "auth/wrong-password":"Contraseña incorrecta",
+    "auth/invalid-credential":"Email o contraseña incorrectos",
+    "auth/email-already-in-use":"Ya existe una cuenta con ese email",
+    "auth/weak-password":"La contraseña debe tener al menos 6 caracteres",
+    "auth/network-request-failed":"Sin conexión a internet",
+    "auth/too-many-requests":"Demasiados intentos. Intenta más tarde",
+    "auth/missing-password":"Ingresa una contraseña"
+  };
+  return t[code]||"Error: "+code;
+}
+
+async function hacerLogin(){
+  var email=document.getElementById("login-email").value.trim();
+  var pass=document.getElementById("login-pass").value;
+  var errEl=document.getElementById("auth-err-login");
+  errEl.textContent="";
+  if(!email||!pass){errEl.textContent="Completa email y contraseña";return;}
+  try{
+    errEl.textContent="Ingresando...";errEl.style.color="#888";
+    await authLib.signInWithEmailAndPassword(auth,email,pass);
+    // El listener onAuthStateChanged se encarga del resto
+  }catch(e){
+    errEl.style.color="#e63946";
+    errEl.textContent=traducirErrorAuth(e.code);
+  }
+}
+
+async function hacerRegistro(){
+  var nombre=document.getElementById("reg-nombre").value.trim();
+  var escuela=document.getElementById("reg-escuela").value.trim();
+  var email=document.getElementById("reg-email").value.trim();
+  var pass=document.getElementById("reg-pass").value;
+  var errEl=document.getElementById("auth-err-register");
+  errEl.textContent="";errEl.style.color="#e63946";
+  if(!nombre||!escuela||!email||!pass){errEl.textContent="Completa todos los campos";return;}
+  if(pass.length<6){errEl.textContent="La contraseña debe tener al menos 6 caracteres";return;}
+  try{
+    errEl.textContent="Creando cuenta...";errEl.style.color="#888";
+    var cred=await authLib.createUserWithEmailAndPassword(auth,email,pass);
+    await authLib.updateProfile(cred.user,{displayName:nombre});
+    // Guardamos los datos iniciales de la escuela
+    pendingNewUser={nombre:nombre,escuela:escuela};
+    // onAuthStateChanged se encarga del resto
+  }catch(e){
+    errEl.style.color="#e63946";
+    errEl.textContent=traducirErrorAuth(e.code);
+  }
+}
+
+async function hacerRecuperar(){
+  var email=document.getElementById("rec-email").value.trim();
+  var errEl=document.getElementById("auth-err-recover");
+  errEl.textContent="";errEl.style.color="#e63946";
+  if(!email){errEl.textContent="Ingresa tu email";return;}
+  try{
+    errEl.textContent="Enviando...";errEl.style.color="#888";
+    await authLib.sendPasswordResetEmail(auth,email);
+    errEl.style.color="#22c55e";
+    errEl.innerHTML='<div style="font-weight:700;margin-bottom:6px">✓ Email enviado a:<br>'+email+'</div>'+
+      '<div style="background:#3a2510;border:1px solid #f4c430;border-radius:8px;padding:10px;margin-top:10px;color:#ffd97a;text-align:left;font-size:12px;font-weight:400">'+
+      '<b>⚠ IMPORTANTE:</b><br>'+
+      'Si no encuentras el correo en tu bandeja de entrada, revisa la carpeta <b>SPAM</b> o <b>Correo no deseado</b>.<br><br>'+
+      'El remitente es <b>noreply@tkd-control-5ae77.firebaseapp.com</b>'+
+      '</div>';
+  }catch(e){
+    errEl.style.color="#e63946";
+    errEl.textContent=traducirErrorAuth(e.code);
+  }
+}
+
+async function cerrarSesion(){
+  if(!confirm("¿Cerrar sesión?"))return;
+  try{
+    await authLib.signOut(auth);
+    location.reload();
+  }catch(e){toast("Error al cerrar sesión","#e63946");}
+}
+
+function modalMiCuenta(){
+  var u=currentUser;
+  if(!u)return;
+  // Info de suscripción
+  var subHTML="";
+  if(userSub){
+    if(userSub.tipo==="vip"||userSub.tipo==="permanente"){
+      subHTML='<div style="width:100%;background:linear-gradient(135deg,#f4c430,#b8860b);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;color:#000">'+
+        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:700">👑 Cuenta VIP</div>'+
+        '<div style="font-size:14px;font-weight:800">Acceso sin restricciones</div>'+
+        '</div>';
+    } else {
+      var dias=diasRestantes();
+      var venceDate=new Date(userSub.vence);
+      var venceTxt=venceDate.toLocaleDateString("es-CL");
+      var color=dias<=0?"#e63946":dias<=3?"#f59e0b":"#22c55e";
+      var estado=dias<=0?"🔒 Expirada (modo solo lectura)":dias===1?"⚠ Último día":dias+" días restantes";
+      subHTML='<div style="width:100%;background:#181818;border-radius:10px;padding:14px;margin-bottom:14px;text-align:left;font-size:13px;border:1px solid '+color+'44">'+
+        '<div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Periodo de prueba</div>'+
+        '<div style="color:'+color+';font-weight:700;font-size:14px;margin-bottom:4px">'+estado+'</div>'+
+        '<div style="color:var(--muted);font-size:11px">Vence: '+venceTxt+'</div>'+
+        '</div>';
+    }
+  }
+
+  var esVip=userSub&&(userSub.tipo==="vip"||userSub.tipo==="permanente");
+  var botonPlanes=esVip?"":'<button class="btn btn-red" style="width:100%;margin-bottom:8px;padding:13px;font-weight:700" onclick="closeModal();setTimeout(modalPlanes,200)">💎 Ver planes de suscripción</button>';
+
+  var h='<div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px">'+
+    '<div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#e63946,#7f1d1d);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700;margin-bottom:14px">'+(u.displayName||u.email||"?").substring(0,1).toUpperCase()+'</div>'+
+    '<h3 style="margin-bottom:4px">'+(u.displayName||"Sin nombre")+'</h3>'+
+    '<p style="color:var(--muted);font-size:13px;margin-bottom:18px">'+u.email+'</p>'+
+    subHTML+
+    botonPlanes+
+    '<div style="width:100%;background:#181818;border-radius:10px;padding:14px;margin-bottom:14px;text-align:left;font-size:13px">'+
+      '<div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">ID de usuario</div>'+
+      '<div style="font-family:monospace;color:#aaa;font-size:11px;word-break:break-all">'+u.uid+'</div>'+
+    '</div>'+
+    '<button class="btn btn-outline-red" style="width:100%;margin-bottom:8px" onclick="cambiarContrasena()">🔑 Cambiar contraseña</button>'+
+    '<button class="btn btn-outline" style="width:100%" onclick="closeModal();cerrarSesion()">🚪 Cerrar sesión</button>'+
+  '</div>';
+  openModal("Mi cuenta",h);
+}
+
+async function cambiarContrasena(){
+  if(!currentUser||!currentUser.email)return;
+  if(!confirm("Te enviaremos un email a "+currentUser.email+" con un enlace para crear una nueva contraseña. ¿Continuar?"))return;
+  try{
+    await authLib.sendPasswordResetEmail(auth,currentUser.email);
+    closeModal();
+    setTimeout(function(){
+      openModal("✉ Email enviado",
+        '<div style="text-align:center;padding:8px">'+
+        '<div style="font-size:48px;margin-bottom:10px">✉</div>'+
+        '<div style="font-weight:700;margin-bottom:6px;color:#22c55e">Email enviado correctamente</div>'+
+        '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Enviado a:<br><b style="color:#fff">'+currentUser.email+'</b></div>'+
+        '<div style="background:#3a2510;border:1px solid #f4c430;border-radius:10px;padding:12px;text-align:left;font-size:12px;color:#ffd97a;margin-bottom:14px">'+
+          '<b>⚠ IMPORTANTE: Revisa también Spam</b><br>'+
+          'Si no encuentras el correo en pocos minutos, revisa tu carpeta <b>SPAM</b> o <b>Correo no deseado</b>.<br><br>'+
+          'El remitente aparece como:<br><b style="color:#fff">noreply@tkd-control-5ae77.firebaseapp.com</b><br><br>'+
+          '💡 <b>Tip:</b> Márcalo como "No es spam" para que futuros emails lleguen bien.'+
+        '</div>'+
+        '<button class="btn btn-red" style="width:100%" onclick="closeModal()">Entendido</button>'+
+        '</div>'
+      );
+    },200);
+  }catch(e){
+    toast("Error: "+traducirErrorAuth(e.code),"#e63946");
+  }
+}
+
+// ── INSCRIPCIONES PÚBLICAS ──────────────────────────────────────────────────
+let pendientes=[];
+let _idsPendientesConocidos=new Set();
+let _autoRefreshTimer=null;
+let _primeraCarga=true;
+
+// Guarda info pública para que el formulario sepa el nombre de la escuela
+async function actualizarEscuelaPublica(){
+  if(!currentUser)return;
+  try{
+    await fsLib.setDoc(fsLib.doc(db,"escuelas_publicas",currentUser.uid),{
+      nombre:sedeActual().nombre||"Escuela de Taekwondo",
+      activa:true
+    });
+  }catch(e){console.warn("No se pudo actualizar info pública:",e);}
+}
+
+// Carga las inscripciones pendientes desde Firestore (con detección de novedades)
+async function cargarPendientes(){
+  if(!currentUser)return;
+  try{
+    // Consulta filtrada: solo las inscripciones de MI escuela
+    var q=fsLib.query(
+      fsLib.collection(db,"inscripciones_publicas"),
+      fsLib.where("escuelaUid","==",currentUser.uid)
+    );
+    var snap=await fsLib.getDocs(q);
+    var nuevasInscripciones=[];
+    pendientes=[];
+    snap.forEach(function(d){
+      var data=d.data();
+      if(data.estado==="pendiente"){
+        var obj=Object.assign({_docId:d.id},data);
+        pendientes.push(obj);
+        // Si NO es la primera carga y no la conocíamos → es nueva
+        if(!_primeraCarga&&!_idsPendientesConocidos.has(d.id)){
+          nuevasInscripciones.push(obj);
+        }
+      }
+    });
+    // Actualizar set de IDs conocidos
+    _idsPendientesConocidos=new Set(pendientes.map(function(p){return p._docId;}));
+    pendientes.sort(function(a,b){return a.fechaEnvio<b.fechaEnvio?1:-1;});
+    actualizarBadgePendientes();
+
+    // Si hay nuevas, notificar
+    if(nuevasInscripciones.length>0){
+      notificarInscripcionesNuevas(nuevasInscripciones);
+      // Si estoy en dashboard o inscripciones, refrescar la vista
+      if(tab==="dashboard")renderDashboard();
+      else if(tab==="inscripciones")renderInscripciones();
+    }
+    _primeraCarga=false;
+  }catch(e){
+    console.error("Error cargando pendientes:",e);
+  }
+}
+
+// Sonido suave de notificación (dos tonos cortos tipo "ding-ding")
+function sonarNotificacion(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880,ctx.currentTime);
+    osc.frequency.setValueAtTime(1100,ctx.currentTime+0.12);
+    gain.gain.setValueAtTime(0.001,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.15,ctx.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.35);
+  }catch(e){console.warn("No se pudo reproducir sonido:",e);}
+}
+
+// Vibración (solo en celulares compatibles)
+function vibrarNotificacion(){
+  try{if(navigator.vibrate)navigator.vibrate([100,50,100]);}catch(e){}
+}
+
+// Aviso visual de inscripción nueva
+function notificarInscripcionesNuevas(nuevas){
+  sonarNotificacion();
+  vibrarNotificacion();
+  var msg=nuevas.length===1?
+    "🔔 Nueva inscripción de "+nuevas[0].nombre:
+    "🔔 "+nuevas.length+" inscripciones nuevas";
+  mostrarToastInscripcion(msg);
+}
+
+// Toast clickeable más visible que el toast normal
+function mostrarToastInscripcion(msg){
+  var prev=document.getElementById("toast-insc");
+  if(prev)prev.remove();
+  var div=document.createElement("div");
+  div.id="toast-insc";
+  div.style.cssText="position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#e63946,#7f1d1d);color:#fff;padding:14px 22px;border-radius:30px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(230,57,70,0.5);z-index:9999;cursor:pointer;animation:slideDownToast 0.4s ease-out;max-width:90%;text-align:center";
+  div.innerHTML=msg+'<div style="font-size:11px;font-weight:400;opacity:0.9;margin-top:3px">Toca para ver →</div>';
+  div.onclick=function(){div.remove();goTab("inscripciones");};
+  if(!document.getElementById("toast-anim-style")){
+    var style=document.createElement("style");
+    style.id="toast-anim-style";
+    style.textContent="@keyframes slideDownToast{from{opacity:0;transform:translate(-50%,-30px)}to{opacity:1;transform:translate(-50%,0)}}";
+    document.head.appendChild(style);
+  }
+  document.body.appendChild(div);
+  setTimeout(function(){if(div.parentNode)div.remove();},8000);
+}
+
+// Auto-refresco cada 60 segundos
+function iniciarAutoRefresco(){
+  if(_autoRefreshTimer)clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer=setInterval(function(){
+    if(currentUser&&!document.hidden)cargarPendientes();
+  },60000);
+}
+
+// Al volver a la pestaña/app, refrescar de inmediato
+document.addEventListener("visibilitychange",function(){
+  if(!document.hidden&&currentUser&&!_primeraCarga){
+    cargarPendientes();
+  }
+});
+
+function actualizarBadgePendientes(){
+  var badge=document.getElementById("badge-pendientes");
+  if(!badge)return;
+  if(pendientes.length>0){
+    badge.textContent=pendientes.length;
+    badge.style.display="";
+  } else {
+    badge.style.display="none";
+  }
+}
+
+// Genera y muestra el link de inscripción
+function modalLinkInscripcion(){
+  if(!currentUser){toast("Debes iniciar sesión");return;}
+  // Asegurar que el nombre de escuela esté publicado
+  actualizarEscuelaPublica();
+
+  var baseUrl=window.location.href.replace(/\/index\.html.*$/,"/").replace(/\?.*$/,"").replace(/\/$/,"")+"/";
+  var link=baseUrl+"inscripcion.html?escuela="+currentUser.uid;
+
+  var msgWa="Hola! Te envío el formulario de inscripción a "+(sedeActual().nombre||"nuestra escuela")+" de Taekwondo:\n\n"+link+"\n\nPor favor complétalo cuando puedas. ¡Gracias!";
+  var waUrl="https://wa.me/?text="+encodeURIComponent(msgWa);
+
+  openModal("Link de inscripción",
+    '<div class="card2" style="text-align:center;margin-bottom:14px">'+
+    '<div style="font-size:36px;margin-bottom:8px">🔗</div>'+
+    '<div style="font-weight:700;margin-bottom:6px">Comparte este link con apoderados nuevos</div>'+
+    '<div style="font-size:12px;color:var(--muted)">Al completarlo, llega como inscripción pendiente a tu app</div>'+
+    '</div>'+
+    '<div class="field"><label>Link del formulario</label>'+
+    '<input id="link-ins" type="text" readonly value="'+link+'" style="font-size:12px"/></div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+    '<button class="btn btn-outline-red" style="flex:1" onclick="copiarLink()">📋 Copiar link</button>'+
+    '<button class="btn btn-red" style="flex:1" onclick="window.open(\''+waUrl+'\',\'_blank\')">📲 Enviar por WhatsApp</button>'+
+    '</div>'+
+    '<div class="alert-warn" style="font-size:12px"><b>💡 Tip:</b> Cuando un apoderado lo complete, lo verás en el menú <b>"Inscripciones"</b> para revisar y aprobar.</div>'+
+    '<div style="margin-top:14px;text-align:center"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>'
+  );
+}
+
+function copiarLink(){
+  var inp=document.getElementById("link-ins");
+  inp.select();
+  inp.setSelectionRange(0,99999);
+  try{
+    document.execCommand("copy");
+    toast("✓ Link copiado al portapapeles","#22c55e");
+  }catch(e){
+    // Fallback con clipboard API
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(inp.value).then(function(){
+        toast("✓ Link copiado","#22c55e");
+      });
+    }
+  }
+}
+
+// Renderiza la tab de inscripciones pendientes
+function renderInscripciones(){
+  var root=document.getElementById("content");
+  if(!root)return;
+  var html='<div style="padding:14px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap">'+
+    '<h2 style="font-size:18px">📝 Inscripciones pendientes</h2>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button class="btn btn-outline" style="padding:8px 12px;font-size:12px" onclick="cargarPendientes();toast(\'Buscando inscripciones...\')">🔄 Actualizar</button>'+
+    '<button class="btn btn-red" style="padding:8px 14px;font-size:12px" onclick="modalLinkInscripcion()">🔗 Generar link</button>'+
+    '</div>'+
+    '</div>';
+
+  if(pendientes.length===0){
+    html+='<div class="card2" style="text-align:center;padding:40px 20px;color:var(--muted)">'+
+      '<div style="font-size:48px;margin-bottom:10px;opacity:0.5">📭</div>'+
+      '<div style="font-weight:600;margin-bottom:6px">No hay inscripciones pendientes</div>'+
+      '<div style="font-size:12px">Cuando un apoderado complete el formulario, aparecerá aquí</div>'+
+      '</div>';
+  } else {
+    pendientes.forEach(function(p){
+      var fecha=new Date(p.fechaEnvio);
+      var fechaStr=fecha.toLocaleDateString("es-CL")+" "+fecha.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+      var consOk=(p.consImagen?1:0)+(p.consMedico?1:0)+(p.consReglamento?1:0);
+      var consCol=consOk===3?"#22c55e":consOk>=1?"#f4c430":"#e63946";
+      html+='<div class="card2" style="margin-bottom:10px;cursor:pointer" onclick="verInscripcion(\''+p._docId+'\')">'+
+        '<div style="display:flex;gap:12px;align-items:center">'+
+        (p.foto?'<img src="'+p.foto+'" style="width:50px;height:50px;border-radius:25px;object-fit:cover"/>':
+         '<div style="width:50px;height:50px;border-radius:25px;background:linear-gradient(135deg,#e63946,#7f1d1d);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800">'+p.nombre.substring(0,1)+'</div>')+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-weight:700;font-size:14px">'+p.nombre+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+
+            (p.grupo==="ninos"?"👦 Niño":"🧑 Joven/Adulto")+
+            (p.nac?" · "+edad(p.nac)+" años":"")+
+          '</div>'+
+          '<div style="font-size:10px;color:var(--muted);margin-top:3px">📅 '+fechaStr+'</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="background:'+consCol+'22;color:'+consCol+';padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700">'+consOk+'/3 ✓</div>'+
+          '<div style="font-size:18px;margin-top:6px">›</div>'+
+        '</div>'+
+        '</div>'+
+        '</div>';
+    });
+  }
+  html+='</div>';
+  root.innerHTML=html;
+}
+
+// Ve el detalle de una inscripción y permite aprobar/rechazar
+function verInscripcion(docId){
+  var p=pendientes.find(function(x){return x._docId===docId;});
+  if(!p)return;
+
+  var consBadge=function(ok,txt){
+    return'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">'+
+      '<span style="color:'+(ok?"var(--green)":"var(--red)")+';font-weight:800;width:18px">'+(ok?"✓":"✗")+'</span>'+
+      '<span style="color:'+(ok?"#f0f0f0":"var(--muted)")+'">'+txt+'</span></div>';
+  };
+
+  var dato=function(label,valor){
+    if(!valor)return"";
+    return'<div style="display:flex;gap:10px;margin-bottom:8px;font-size:13px">'+
+      '<span style="color:var(--muted);min-width:100px;flex-shrink:0">'+label+'</span>'+
+      '<span style="font-weight:600;word-break:break-word">'+valor+'</span></div>';
+  };
+
+  var medItems=[
+    ["Sangre",p.sangre],["Previsión",p.prevision],["Alergias",p.alergias],
+    ["Enfermedades",p.enfermedades],["Medicamentos",p.medicamentos],["Emergencia",p.emergencia]
+  ].filter(function(x){return x[1];});
+
+  var fecha=new Date(p.fechaEnvio);
+  var fechaStr=fecha.toLocaleString("es-CL");
+
+  openModal("Inscripción de "+p.nombre,
+    '<div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px">Recibida: '+fechaStr+'</div>'+
+    (p.foto?'<div style="text-align:center;margin-bottom:14px"><img src="'+p.foto+'" style="width:100px;height:100px;border-radius:50px;object-fit:cover;border:3px solid #e63946"/></div>':'')+
+    '<div class="card2" style="margin-bottom:12px">'+
+    '<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:8px">👤 ALUMNO</div>'+
+    dato("Nombre",p.nombre)+
+    dato("RUT",p.rut)+
+    dato("Grupo",p.grupo==="ninos"?"Niños":"Jóvenes/Adultos")+
+    dato("Nacimiento",p.nac?p.nac+" ("+edad(p.nac)+" años)":"")+
+    dato("Teléfono",p.tel)+
+    dato("Email",p.email)+
+    '</div>'+
+    (p.apodNombre||p.apodTel?
+      '<div class="card2" style="margin-bottom:12px;border:1px solid #f59e0b44">'+
+      '<div style="font-size:11px;color:#f59e0b;font-weight:700;margin-bottom:8px">👨‍👩‍👦 APODERADO</div>'+
+      dato("Nombre",p.apodNombre)+
+      dato("Teléfono",p.apodTel)+
+      dato("Email",p.apodEmail)+
+      dato("Dirección",p.direccion)+
+      '</div>':'')+
+    (medItems.length>0?
+      '<div class="card2" style="margin-bottom:12px;border:1px solid #3b82f644">'+
+      '<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:8px">🩺 FICHA MÉDICA</div>'+
+      medItems.map(function(x){return dato(x[0],x[1]);}).join('')+
+      '</div>':'')+
+    (p.obs?'<div class="card2" style="margin-bottom:12px"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">📝 OBSERVACIONES</div><div style="font-size:13px">'+p.obs+'</div></div>':'')+
+    '<div class="card2" style="margin-bottom:14px;border:1px solid #22c55e44">'+
+    '<div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px">📋 CONSENTIMIENTOS</div>'+
+    consBadge(p.consImagen,"Uso de imagen")+
+    consBadge(p.consMedico,"Atención médica de urgencia")+
+    consBadge(p.consReglamento,"Reglamento interno")+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+    '<button class="btn btn-outline-red" onclick="rechazarInscripcion(\''+docId+'\')">✗ Rechazar</button>'+
+    '<button class="btn btn-red" onclick="aprobarInscripcion(\''+docId+'\')">✓ Aprobar e inscribir</button>'+
+    '</div>'+
+    '<div style="text-align:center;margin-top:8px"><button class="btn btn-outline" style="font-size:12px;padding:8px 14px" onclick="closeModal()">Cerrar sin acción</button></div>'
+  );
+}
+
+async function aprobarInscripcion(docId){
+  var p=pendientes.find(function(x){return x._docId===docId;});
+  if(!p)return;
+  if(!confirm("¿Aprobar a "+p.nombre+" e inscribirlo como alumno activo?"))return;
+
+  // Crear alumno con los datos del formulario
+  var nuevoAlumno={
+    id:"a"+Date.now(),
+    nombre:p.nombre,
+    rut:p.rut||"",
+    grupo:p.grupo||"ninos",
+    nac:p.nac||"",
+    ingreso:HOY,
+    cinturon:"Blanco",
+    estado:"Activo",
+    fechaCinturonActual:HOY,
+    cuota:0,
+    tel:p.tel||"",
+    email:p.email||"",
+    apodNombre:p.apodNombre||"",
+    apodTel:p.apodTel||"",
+    sangre:p.sangre||"",
+    prevision:p.prevision||"",
+    alergias:p.alergias||"",
+    enfermedades:p.enfermedades||"",
+    medicamentos:p.medicamentos||"",
+    emergencia:p.emergencia||"",
+    obs:p.obs||"",
+    consImagen:!!p.consImagen,
+    consMedico:!!p.consMedico,
+    consReglamento:!!p.consReglamento,
+    foto:p.foto||""
+  };
+
+  try{
+    DB.alumnos.push(nuevoAlumno);
+    await fsSet(pref()+"alumnos",nuevoAlumno.id,nuevoAlumno);
+    // Marcar la inscripción como aprobada y luego borrarla
+    await fsLib.deleteDoc(fsLib.doc(db,"inscripciones_publicas",docId));
+    // Quitar de la lista local
+    pendientes=pendientes.filter(function(x){return x._docId!==docId;});
+    actualizarBadgePendientes();
+    closeModal();
+    toast("✅ "+p.nombre+" inscrito correctamente","#22c55e");
+    if(tab==="inscripciones")renderInscripciones();
+    else if(tab==="alumnos")renderAlumnos();
+    else if(tab==="dashboard")renderDashboard();
+  }catch(e){
+    toast("Error al aprobar: "+e.message,"#e63946");
+  }
+}
+
+async function rechazarInscripcion(docId){
+  var p=pendientes.find(function(x){return x._docId===docId;});
+  if(!p)return;
+  if(!confirm("¿Rechazar la inscripción de "+p.nombre+"? Se eliminará permanentemente."))return;
+  try{
+    await fsLib.deleteDoc(fsLib.doc(db,"inscripciones_publicas",docId));
+    pendientes=pendientes.filter(function(x){return x._docId!==docId;});
+    actualizarBadgePendientes();
+    closeModal();
+    toast("Inscripción rechazada","#888");
+    if(tab==="inscripciones")renderInscripciones();
+  }catch(e){
+    toast("Error: "+e.message,"#e63946");
+  }
+}
+
+// ── SEDES ───────────────────────────────────────────────────────────────────
+function renderSedeBar(){
+  var bar=document.getElementById("sede-bar");
+  bar.innerHTML='<button class="sede-add" onclick="modalNuevaSede()">+</button>';
+  sedes.forEach(function(s){
+    var chip=document.createElement("button");
+    chip.className="sede-chip"+(s.id===sedeId?" active":"");
+    chip.textContent=s.nombre;
+    chip.onclick=async function(){sedeId=s.id;await cargarTodo();updateHeader();renderSedeBar();render();};
+    var timer;
+    chip.addEventListener("touchstart",function(){timer=setTimeout(function(){modalEditarSede(s.id);},700);});
+    chip.addEventListener("touchend",function(){clearTimeout(timer);});
+    bar.appendChild(chip);
+  });
+}
+function diasHTML(sel){
+  return'<div class="dias-check">'+DIAS_SEMANA.map(function(d){var on=(sel||[]).indexOf(d)>-1;return'<button type="button" class="dia-btn'+(on?" on":"")+'" onclick="toggleDia(\''+d+'\')" id="dia-'+d+'">'+d+'</button>';}).join('')+'</div>';
+}
+function toggleDia(d){
+  var idx=diasSel.indexOf(d);if(idx>-1)diasSel.splice(idx,1);else diasSel.push(d);
+  document.querySelectorAll(".dia-btn").forEach(function(b){var dia=b.id.replace("dia-","");b.className="dia-btn"+(diasSel.indexOf(dia)>-1?" on":"");});
+}
+function modalNuevaSede(){
+  logoDataUrl="";diasSel=[];
+  openModal("Nueva sede",
+    '<div class="field"><label>Nombre *</label><input id="sd-nombre" placeholder="ej: Sede Norte"/></div>'+
+    '<div class="field"><label>Dias de entrenamiento</label>'+diasHTML([])+'</div>'+
+    '<div class="field"><label>Logo</label><label style="display:flex;align-items:center;gap:12px;cursor:pointer">'+
+    '<div style="width:56px;height:56px;border-radius:12px;background:#222;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px" id="sd-prev">🥋</div>'+
+    '<span style="background:var(--card2);border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;color:var(--muted);border:1.5px dashed var(--border)">📷 Elegir</span>'+
+    '<input type="file" accept="image/*" style="display:none" onchange="prevLogo(this,\'sd-prev\')"/></label></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="crearSede()">Crear</button></div>');
+}
+function modalEditarSede(id){
+  var s=sedes.find(function(x){return x.id===id;});if(!s)return;
+  logoDataUrl="";diasSel=(s.dias||[]).slice();
+  openModal("Editar sede",
+    '<div class="field"><label>Nombre</label><input id="sd-nombre" value="'+s.nombre+'"/></div>'+
+    '<div class="field"><label>Dias de entrenamiento</label>'+diasHTML(s.dias||[])+'</div>'+
+    '<div class="field"><label>Logo</label><label style="display:flex;align-items:center;gap:12px;cursor:pointer">'+
+    '<div style="width:56px;height:56px;border-radius:12px;background:#222;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px" id="sd-prev">'+
+    (s.logo?'<img src="'+s.logo+'" style="width:100%;height:100%;object-fit:cover"/>':"🥋")+
+    '</div><span style="background:var(--card2);border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;color:var(--muted);border:1.5px dashed var(--border)">📷 Cambiar</span>'+
+    '<input type="file" accept="image/*" style="display:none" onchange="prevLogo(this,\'sd-prev\')"/></label></div>'+
+    '<div class="div"></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="eliminarSede(\''+id+'\')">🗑 Eliminar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="editarSede(\''+id+'\')">Guardar</button></div>');
+}
+function prevLogo(input,prevId){
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){logoDataUrl=e.target.result;document.getElementById(prevId).innerHTML='<img src="'+logoDataUrl+'" style="width:100%;height:100%;object-fit:cover"/>';};
+  r.readAsDataURL(file);
+}
+async function crearSede(){
+  var nombre=(document.getElementById("sd-nombre")||{}).value||"";nombre=nombre.trim();
+  if(!nombre){alert("Ingresa el nombre");return;}
+  var nueva={id:"s"+Date.now(),nombre:nombre,logo:logoDataUrl||"",dias:diasSel.slice()};
+  sedes.push(nueva);sedeId=nueva.id;
+  await saveSedes();await cargarTodo();closeModal();updateHeader();renderSedeBar();render();
+  toast("Sede creada");
+}
+async function editarSede(id){
+  var nombre=(document.getElementById("sd-nombre")||{}).value||"";nombre=nombre.trim();
+  if(!nombre){alert("Ingresa el nombre");return;}
+  sedes=sedes.map(function(s){return s.id===id?Object.assign({},s,{nombre:nombre,dias:diasSel.slice(),logo:logoDataUrl||s.logo}):s;});
+  await saveSedes();closeModal();updateHeader();renderSedeBar();
+  toast("Sede actualizada");
+}
+async function eliminarSede(id){
+  if(sedes.length<=1){alert("Debe haber al menos una sede");return;}
+  if(!confirm("Eliminar esta sede y todos sus datos?"))return;
+  sedes=sedes.filter(function(s){return s.id!==id;});
+  sedeId=sedes[0].id;await saveSedes();await cargarTodo();closeModal();updateHeader();renderSedeBar();render();
+}
+
+// ── ALUMNOS (con ficha médica e historial) ──────────────────────────────────
+function calcAsistencia(alumnoId,desde,hasta){
+  var fechas=Object.keys(DB.asistencia).filter(function(f){
+    if(desde&&f<desde)return false;
+    if(hasta&&f>hasta)return false;
+    return true;
+  });
+  if(fechas.length===0)return{pct:0,total:0,pres:0};
+  var pres=0;
+  fechas.forEach(function(f){if((DB.asistencia[f]||{})[alumnoId]==="P")pres++;});
+  return{pct:Math.round(pres/fechas.length*100),total:fechas.length,pres:pres};
+}
+function calcRequisitosExamen(a){
+  // Devuelve {ok, motivos[]}
+  var ult=a.fechaCinturonActual||a.ingreso;
+  var meses=mesesEntre(ult,HOY);
+  var req=REQ_DEFAULT[a.cinturon]||{meses:3,asist:70};
+  var asist=calcAsistencia(a.id);
+  var motivos=[],ok=true;
+  if(meses<req.meses){ok=false;motivos.push("Lleva "+meses+" meses (requiere "+req.meses+")");}
+  if(asist.pct<req.asist){ok=false;motivos.push("Asistencia "+asist.pct+"% (requiere "+req.asist+"%)");}
+  // Cuota al día (mes actual)
+  var key=ANO+"-"+MES;
+  var pagoMes=(DB.pagos[key]||{})[a.id];
+  if(a.estado!=="Activo"){ok=false;motivos.push("Alumno no activo");}
+  if(pagoMes!=="OK"&&pagoMes!=="P"){motivos.push("Cuota del mes pendiente");/* Aviso, no bloquea */}
+  return{ok:ok,motivos:motivos,meses:meses,reqMeses:req.meses,asist:asist.pct,reqAsist:req.asist};
+}
+function renderAlumnos(search){
+  search=search||"";
+  var filtrados=DB.alumnos.filter(function(a){var s=search.toLowerCase();return a.grupo===grupo&&(a.nombre.toLowerCase().indexOf(s)>-1||(a.cinturon||"").toLowerCase().indexOf(s)>-1||(a.rut||"").toLowerCase().indexOf(s)>-1);});
+  var ninos=DB.alumnos.filter(function(a){return a.grupo==="ninos"&&a.estado==="Activo";}).length;
+  var jovenes=DB.alumnos.filter(function(a){return a.grupo==="jovenes"&&a.estado==="Activo";}).length;
+  var h='<div class="stats-row" style="grid-template-columns:1fr 1fr 1fr">'+
+    '<div class="stat-box"><div class="stat-n">'+DB.alumnos.length+'</div><div class="stat-l">Total</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:#f59e0b">'+ninos+'</div><div class="stat-l">Ninos</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--blue)">'+jovenes+'</div><div class="stat-l">Jovenes</div></div></div>'+
+    '<div class="gtabs">'+
+    '<button class="gtab'+(grupo==="ninos"?" active":"")+'" onclick="grupo=\'ninos\';renderAlumnos()">👦 Ninos</button>'+
+    '<button class="gtab'+(grupo==="jovenes"?" active":"")+'" onclick="grupo=\'jovenes\';renderAlumnos()">🧑 Jovenes</button></div>'+
+    '<div class="srow"><input type="search" placeholder="🔍 Buscar..." oninput="renderAlumnos(this.value)" value="'+search+'"/>'+
+    '<button class="addbtn" onclick="modalNuevoAlumno()">+ Nuevo</button></div>';
+  if(filtrados.length===0){
+    h+='<div style="text-align:center;color:var(--muted);padding:40px 0">Sin alumnos en este grupo<br><br>'+
+      '<button class="btn btn-red" style="width:auto;padding:10px 24px" onclick="modalNuevoAlumno()">+ Agregar</button></div>';
+  } else {
+    filtrados.forEach(function(a){
+      var asist=calcAsistencia(a.id);
+      var avatarHTML=a.foto?
+        '<img src="'+a.foto+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid '+cinColor(a.cinturon)+';flex-shrink:0"/>':
+        cinBadge(a.cinturon);
+      h+='<div class="item" onclick="modalVerAlumno(\''+a.id+'\')">'+avatarHTML+
+        '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+a.nombre+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+edad(a.nac)+' anos · $'+((a.cuota||0).toLocaleString())+' · '+asist.pct+'% asis</div></div>'+
+        tag(a.estado,estadoCol(a.estado))+'</div>';
+    });
+  }
+  document.getElementById("content").innerHTML=h;
+}
+function formAlumnoHTML(a){
+  var esNino=(a.grupo||grupo)==="ninos";
+  return'<div class="field" style="text-align:center;margin-bottom:14px">'+
+    '<div id="f-foto-zone" style="display:inline-block;cursor:pointer;position:relative" onclick="document.getElementById(\'f-foto-input\').click()">'+
+    '<div id="f-foto-preview" style="width:80px;height:80px;border-radius:50%;background:#181818;border:3px dashed #444;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:28px">'+
+    (a.foto?'<img src="'+a.foto+'" style="width:100%;height:100%;object-fit:cover"/>':'📷')+
+    '</div>'+
+    '<div style="position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:#e63946;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #0a0a0a">✏</div>'+
+    '</div>'+
+    '<input type="file" id="f-foto-input" accept="image/*" style="display:none" onchange="cargarFotoAlumno(event)"/>'+
+    '<input type="hidden" id="f-foto-data" value="'+(a.foto||"")+'"/>'+
+    '<div style="font-size:11px;color:var(--muted);margin-top:6px">Toca para '+(a.foto?"cambiar":"agregar")+' foto</div>'+
+    (a.foto?'<div style="margin-top:4px"><a onclick="quitarFotoAlumno()" style="color:var(--red);font-size:11px;cursor:pointer">✕ Quitar foto</a></div>':'')+
+    '</div>'+
+    '<div class="field"><label>Nombre *</label><input id="f-nombre" value="'+(a.nombre||"")+'" placeholder="Apellido, Nombre"/></div>'+
+    '<div class="field"><label>RUT</label><input id="f-rut" value="'+(a.rut||"")+'" placeholder="12.345.678-9" oninput="formatearRut(this)" maxlength="12"/></div>'+
+    '<div class="field"><label>Grupo</label><select id="f-grupo" onchange="toggleApod()">'+
+    '<option value="ninos"'+((!a.grupo||a.grupo==="ninos")?" selected":"")+'>👦 Ninos</option>'+
+    '<option value="jovenes"'+(a.grupo==="jovenes"?" selected":"")+'>🧑 Jovenes</option></select></div>'+
+    '<div class="g2"><div class="field"><label>Fecha nac.</label><input type="date" id="f-nac" value="'+(a.nac||"")+'"/></div>'+
+    '<div class="field"><label>Ingreso</label><input type="date" id="f-ingreso" value="'+(a.ingreso||HOY)+'"/></div></div>'+
+    '<div class="g2"><div class="field"><label>Cinturon</label>'+cinSel("f-cin",a.cinturon||"Blanco")+'</div>'+
+    '<div class="field"><label>Estado</label><select id="f-estado">'+["Activo","Inactivo","Baja"].map(function(s){return'<option'+(s===a.estado?" selected":"")+'>'+s+'</option>';}).join('')+'</select></div></div>'+
+    '<div class="field"><label>Fecha cinturón actual (para examen)</label><input type="date" id="f-fcin" value="'+(a.fechaCinturonActual||"")+'"/></div>'+
+    '<div class="field"><label>Cuota mensual $ (personalizada)</label><input type="number" id="f-cuota" value="'+(a.cuota||0)+'"/></div>'+
+    '<div class="field"><label>Peso (kg) <span style="color:var(--muted);font-weight:400">- para torneos</span></label><input type="number" id="f-peso" step="0.1" min="0" max="200" value="'+(a.peso||"")+'" placeholder="ej: 45.5"/></div>'+
+    '<div class="field"><label>Telefono</label><input id="f-tel" value="'+(a.tel||"")+'" placeholder="912345678"/></div>'+
+    '<div id="apod-box" style="'+(esNino?"":"display:none")+'">'+
+    '<div class="card2" style="margin-bottom:12px;border:1px solid #f59e0b44">'+
+    '<div style="font-size:11px;color:#f59e0b;font-weight:700;margin-bottom:8px">DATOS DEL APODERADO</div>'+
+    '<div class="field"><label>Nombre apoderado</label><input id="f-apod-nombre" value="'+(a.apodNombre||"")+'"/></div>'+
+    '<div class="field" style="margin-bottom:0"><label>Telefono apoderado (WhatsApp)</label><input id="f-apod-tel" value="'+(a.apodTel||"")+'" placeholder="912345678"/></div>'+
+    '</div></div>'+
+    '<div class="field"><label>Email</label><input type="email" id="f-email" value="'+(a.email||"")+'"/></div>'+
+    // FICHA MÉDICA
+    '<div class="card2" style="margin-bottom:12px;border:1px solid #3b82f644">'+
+    '<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:8px">🩺 FICHA MÉDICA</div>'+
+    '<div class="g2"><div class="field"><label>Grupo sanguíneo</label><input id="f-sangre" value="'+(a.sangre||"")+'" placeholder="ej: O+"/></div>'+
+    '<div class="field"><label>Previsión</label><input id="f-prevision" value="'+(a.prevision||"")+'" placeholder="Fonasa, Isapre..."/></div></div>'+
+    '<div class="field"><label>Alergias</label><input id="f-alergias" value="'+(a.alergias||"")+'" placeholder="ej: penicilina, mariscos"/></div>'+
+    '<div class="field"><label>Enfermedades / condiciones</label><input id="f-enfermedades" value="'+(a.enfermedades||"")+'" placeholder="ej: asma, diabetes"/></div>'+
+    '<div class="field"><label>Medicamentos</label><input id="f-medicamentos" value="'+(a.medicamentos||"")+'"/></div>'+
+    '<div class="field" style="margin-bottom:0"><label>Contacto de emergencia (nombre y tel)</label><input id="f-emergencia" value="'+(a.emergencia||"")+'" placeholder="Nombre - 912345678"/></div>'+
+    '</div>'+
+    // CONSENTIMIENTOS
+    '<div class="card2" style="margin-bottom:12px;border:1px solid #22c55e44">'+
+    '<div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px">📋 CONSENTIMIENTOS</div>'+
+    '<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px"><input type="checkbox" id="f-cons-imagen" '+(a.consImagen?"checked":"")+' style="width:auto"/> Autoriza uso de imagen (fotos, videos)</label>'+
+    '<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px"><input type="checkbox" id="f-cons-medico" '+(a.consMedico?"checked":"")+' style="width:auto"/> Autoriza atención médica de urgencia</label>'+
+    '<label style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="checkbox" id="f-cons-reglamento" '+(a.consReglamento?"checked":"")+' style="width:auto"/> Acepta reglamento interno</label>'+
+    '</div>'+
+    '<div class="field"><label>Observaciones</label><textarea id="f-obs" rows="2" style="resize:none">'+(a.obs||"")+'</textarea></div>'+
+    '<div style="display:flex;gap:8px;margin-top:4px">'+
+    '<button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarAlumno(\''+(a.id||"")+'\')">Guardar</button></div>';
+}
+function toggleApod(){var g=document.getElementById("f-grupo"),box=document.getElementById("apod-box");if(box)box.style.display=(g&&g.value==="ninos")?"":"none";}
+
+// === FOTO DEL ALUMNO ===
+function cargarFotoAlumno(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  if(file.size>3*1024*1024){
+    alert("La imagen es muy grande (máximo 3MB). Por favor elige una más pequeña.");
+    event.target.value="";
+    return;
+  }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      // Comprimir a máximo 400x400 manteniendo proporción
+      var maxW=400,maxH=400;
+      var w=img.width,h=img.height;
+      if(w>maxW){h=h*(maxW/w);w=maxW;}
+      if(h>maxH){w=w*(maxH/h);h=maxH;}
+      var canvas=document.createElement("canvas");
+      canvas.width=w;canvas.height=h;
+      var ctx=canvas.getContext("2d");
+      ctx.drawImage(img,0,0,w,h);
+      var dataUrl=canvas.toDataURL("image/jpeg",0.75);
+      // Actualizar preview y campo oculto
+      document.getElementById("f-foto-preview").innerHTML='<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover"/>';
+      document.getElementById("f-foto-preview").style.borderStyle="solid";
+      document.getElementById("f-foto-preview").style.borderColor="#22c55e";
+      document.getElementById("f-foto-data").value=dataUrl;
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function quitarFotoAlumno(){
+  if(!confirm("¿Quitar la foto?"))return;
+  document.getElementById("f-foto-preview").innerHTML='📷';
+  document.getElementById("f-foto-preview").style.borderStyle="dashed";
+  document.getElementById("f-foto-preview").style.borderColor="#444";
+  document.getElementById("f-foto-data").value="";
+  document.getElementById("f-foto-input").value="";
+}
+
+// Ver foto del alumno en grande
+function modalVerFoto(id){
+  var a=DB.alumnos.find(function(x){return x.id===id;});
+  if(!a||!a.foto)return;
+  openModal(a.nombre,
+    '<div style="text-align:center">'+
+    '<img src="'+a.foto+'" style="max-width:100%;max-height:60vh;border-radius:12px;border:3px solid '+cinColor(a.cinturon)+'"/>'+
+    '<div style="margin-top:14px"><button class="btn btn-outline" onclick="modalVerAlumno(\''+id+'\')">← Volver</button></div>'+
+    '</div>'
+  );
+}
+
+// Limpia el RUT (deja solo números y K)
+function limpiarRut(rut){return(rut||"").replace(/[^0-9kK]/g,"").toUpperCase();}
+
+// Calcula el dígito verificador del RUT chileno
+function calcularDV(num){
+  var suma=0,mul=2;
+  for(var i=num.length-1;i>=0;i--){
+    suma+=parseInt(num.charAt(i),10)*mul;
+    mul=mul===7?2:mul+1;
+  }
+  var resto=11-(suma%11);
+  if(resto===11)return"0";
+  if(resto===10)return"K";
+  return String(resto);
+}
+
+// Valida que el RUT sea correcto (con dígito verificador)
+function validarRut(rut){
+  var r=limpiarRut(rut);
+  if(r.length<2)return false;
+  var num=r.slice(0,-1),dv=r.slice(-1);
+  if(!/^\d+$/.test(num))return false;
+  return calcularDV(num)===dv;
+}
+
+// Formatea el RUT mientras se escribe: 123456789 → 12.345.678-9
+function formatearRut(input){
+  var r=limpiarRut(input.value);
+  if(r.length<2){input.value=r;return;}
+  var num=r.slice(0,-1),dv=r.slice(-1);
+  // Agrega puntos cada 3 dígitos desde la derecha
+  var formateado="";
+  for(var i=num.length-1,j=0;i>=0;i--,j++){
+    if(j>0&&j%3===0)formateado="."+formateado;
+    formateado=num.charAt(i)+formateado;
+  }
+  input.value=formateado+"-"+dv;
+  // Si está completo y es válido, borde verde; si está completo y es inválido, borde rojo
+  if(r.length>=8){
+    input.style.borderColor=validarRut(r)?"#22c55e":"#e63946";
+  } else {
+    input.style.borderColor="";
+  }
+}
+function modalNuevoAlumno(){openModal("Nuevo alumno",formAlumnoHTML({grupo:grupo}));}
+function modalVerAlumno(id){
+  var a=DB.alumnos.find(function(x){return x.id===id;});if(!a)return;
+  var asist=calcAsistencia(a.id);
+  var req=calcRequisitosExamen(a);
+  // historial de cinturones
+  var examsAprob=DB.examenes.filter(function(e){return e.alumnoId===a.id&&e.resultado==="Aprobado";}).sort(function(x,y){return x.fecha<y.fecha?-1:1;});
+  var historialHTML='<div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px">HISTORIAL DE CINTURONES</div>';
+  if(a.ingreso)historialHTML+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">'+cinBadge("Blanco",26)+'<span><b>Ingreso</b> · '+a.ingreso+'</span></div>';
+  examsAprob.forEach(function(e){
+    historialHTML+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">'+cinBadge(e.cinturonObtener,26)+'<span><b>'+e.cinturonObtener+'</b> · '+e.fecha+'</span></div>';
+  });
+  if(examsAprob.length===0&&!a.ingreso)historialHTML+='<div style="color:var(--muted);font-size:12px">Sin historial registrado</div>';
+
+  var reqHTML=req.ok?'<div class="alert-green">✅ Cumple requisitos para examen</div>':
+    '<div class="alert-warn"><b>⚠ Aún no califica para examen</b><br>'+req.motivos.join('<br>')+'</div>';
+  if(req.ok===false&&req.motivos.length===0)reqHTML='<div class="alert-green">✅ Cumple requisitos para examen</div>';
+
+  // ficha médica
+  var medItems=[["Sangre",a.sangre],["Previsión",a.prevision],["Alergias",a.alergias],["Enfermedades",a.enfermedades],["Medicamentos",a.medicamentos],["Emergencia",a.emergencia]].filter(function(x){return x[1];});
+  var medHTML='';
+  if(medItems.length>0){
+    medHTML='<div class="card2" style="margin-bottom:12px;border:1px solid #3b82f644"><div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:8px">🩺 FICHA MÉDICA</div>'+
+      medItems.map(function(x){return'<div style="display:flex;gap:10px;margin-bottom:6px;font-size:12px"><span style="color:var(--muted);min-width:90px">'+x[0]+'</span><span style="font-weight:600">'+x[1]+'</span></div>';}).join('')+'</div>';
+  }
+
+  // consentimientos
+  var consItems=[
+    ["Uso de imagen (fotos, videos)",a.consImagen],
+    ["Atención médica de urgencia",a.consMedico],
+    ["Reglamento interno",a.consReglamento]
+  ];
+  var consAceptados=consItems.filter(function(x){return x[1];}).length;
+  var consColor=consAceptados===3?"#22c55e44":consAceptados===0?"#e6394644":"#f4c43044";
+  var consTitleColor=consAceptados===3?"var(--green)":consAceptados===0?"var(--red)":"var(--gold)";
+  var consHTML='<div class="card2" style="margin-bottom:12px;border:1px solid '+consColor+'">'+
+    '<div style="font-size:11px;color:'+consTitleColor+';font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'+
+    '<span>📋 CONSENTIMIENTOS</span>'+
+    '<span style="font-size:10px">'+consAceptados+'/3</span>'+
+    '</div>'+
+    consItems.map(function(x){
+      var icon=x[1]?'<span style="color:var(--green);font-weight:800">✓</span>':'<span style="color:var(--red);font-weight:800">✗</span>';
+      var textCol=x[1]?"#f0f0f0":"var(--muted)";
+      var label=x[1]?"Autoriza":"No autoriza";
+      return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px">'+
+        '<span style="width:18px;text-align:center">'+icon+'</span>'+
+        '<span style="flex:1;color:'+textCol+'">'+x[0]+'</span>'+
+        '<span style="font-size:10px;color:var(--muted);font-weight:600">'+label+'</span>'+
+        '</div>';
+    }).join('')+
+    '</div>';
+
+  openModal("Alumno",
+    '<div class="card2" style="display:flex;align-items:center;gap:14px;margin-bottom:16px">'+
+    (a.foto?
+      '<img src="'+a.foto+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid '+cinColor(a.cinturon)+';flex-shrink:0;cursor:pointer" onclick="modalVerFoto(\''+id+'\')"/>':
+      cinBadge(a.cinturon,52))+
+    '<div><div style="font-weight:800;font-size:16px">'+a.nombre+'</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-top:3px">'+(a.grupo==="ninos"?"Ninos":"Jovenes")+' · '+edad(a.nac)+' anos · '+asist.pct+'% asis</div>'+
+    '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+tag(a.estado,estadoCol(a.estado))+' '+tag(a.cinturon,"#888")+'</div></div></div>'+
+    reqHTML+
+    [["RUT",a.rut],["Ingreso",a.ingreso],["Cuota","$"+(a.cuota||0).toLocaleString()+"/mes"],["Peso",a.peso?a.peso+" kg ("+categoriaPeso(a.peso,edad(a.nac),a.grupo)+")":""],["Tel",a.tel],["Email",a.email],["Apoderado",a.apodNombre],["Tel. Apod.",a.apodTel],["Obs.",a.obs]].filter(function(x){return x[1];}).map(function(x){
+      return'<div style="display:flex;gap:10px;margin-bottom:10px;font-size:13px"><span style="color:var(--muted);min-width:90px;flex-shrink:0">'+x[0]+'</span><span style="font-weight:600">'+x[1]+'</span></div>';
+    }).join('')+
+    medHTML+
+    consHTML+
+    '<div class="card2" style="margin-bottom:12px">'+historialHTML+'</div>'+
+    '<div class="div"></div><div style="display:flex;gap:8px">'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="openModal(\'Editar alumno\',formAlumnoHTML(DB.alumnos.find(function(x){return x.id===\''+id+'\';})))">✏ Editar</button>'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="confirmarEliminar(\''+id+'\')">🗑 Eliminar</button></div>');
+}
+function confirmarEliminar(id){
+  var a=DB.alumnos.find(function(x){return x.id===id;});
+  openModal("Eliminar?",
+    '<p style="color:var(--muted);margin-bottom:20px">Eliminar a <b>'+a.nombre+'</b>? Esta accion no se puede deshacer.</p>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="eliminarAlumno(\''+id+'\')">Eliminar</button></div>');
+}
+async function guardarAlumno(id){
+  var g=function(k){var el=document.getElementById(k);return el?el.value:"";};
+  var gc=function(k){var el=document.getElementById(k);return el?!!el.checked:false;};
+  var nombre=g("f-nombre").trim();if(!nombre){alert("Ingresa el nombre");return;}
+  var rutVal=g("f-rut").trim();
+  if(rutVal&&!validarRut(rutVal)){
+    if(!confirm("El RUT '"+rutVal+"' no parece válido.\n¿Deseas guardarlo de todos modos?"))return;
+  }
+  var fotoData=document.getElementById("f-foto-data");
+  var obj={
+    nombre:nombre,rut:g("f-rut").trim(),grupo:g("f-grupo"),nac:g("f-nac"),ingreso:g("f-ingreso"),
+    cinturon:g("f-cin"),estado:g("f-estado"),fechaCinturonActual:g("f-fcin"),
+    cuota:+(g("f-cuota"))||0,peso:+(g("f-peso"))||0,tel:g("f-tel"),email:g("f-email"),obs:g("f-obs"),
+    apodNombre:g("f-apod-nombre"),apodTel:g("f-apod-tel"),
+    sangre:g("f-sangre"),prevision:g("f-prevision"),alergias:g("f-alergias"),
+    enfermedades:g("f-enfermedades"),medicamentos:g("f-medicamentos"),emergencia:g("f-emergencia"),
+    consImagen:gc("f-cons-imagen"),consMedico:gc("f-cons-medico"),consReglamento:gc("f-cons-reglamento"),
+    foto:fotoData?fotoData.value:""
+  };
+  if(id){
+    obj.id=id;
+    var prev=DB.alumnos.find(function(a){return a.id===id;});
+    // si cambió el cinturón sin fecha, marcar hoy
+    if(prev&&prev.cinturon!==obj.cinturon&&!obj.fechaCinturonActual)obj.fechaCinturonActual=HOY;
+    DB.alumnos=DB.alumnos.map(function(a){return a.id===id?Object.assign({},a,obj):a;});
+  } else {
+    obj.id="a"+Date.now();
+    if(!obj.fechaCinturonActual)obj.fechaCinturonActual=obj.ingreso||HOY;
+    DB.alumnos.push(obj);
+  }
+  await saveAlumno(obj);closeModal();updateHeader();render();
+  toast("Alumno guardado");
+}
+async function eliminarAlumno(id){
+  DB.alumnos=DB.alumnos.filter(function(a){return a.id!==id;});
+  await delAlumno(id);closeModal();updateHeader();renderAlumnos();
+  toast("Alumno eliminado","#e63946");
+}
+
+// ── ASISTENCIA ──────────────────────────────────────────────────────────────
+function renderAsistencia(){
+  var reg=DB.asistencia[asisFecha]||{};
+  var activos=DB.alumnos.filter(function(a){return a.grupo===asisGrupo&&a.estado==="Activo";});
+  var counts=AEST_RAW.map(function(e){return activos.filter(function(a){return reg[a.id]===e;}).length;});
+  var s=sedeActual();
+  var diasStr=(s.dias&&s.dias.length>0)?"Entrena: "+s.dias.join(", "):"Sin dias configurados (toca el logo para editar)";
+  var h='<div class="gtabs">'+
+    '<button class="gtab'+(asisGrupo==="ninos"?" active":"")+'" onclick="asisGrupo=\'ninos\';renderAsistencia()">👦 Ninos</button>'+
+    '<button class="gtab'+(asisGrupo==="jovenes"?" active":"")+'" onclick="asisGrupo=\'jovenes\';renderAsistencia()">🧑 Jovenes</button></div>'+
+    '<div class="card2" style="margin-bottom:12px;display:flex;align-items:center;gap:8px">'+
+    '<span style="font-size:18px">📅</span><span style="font-size:12px;color:var(--muted)">'+diasStr+'</span></div>'+
+    '<div class="field"><label>Fecha de la clase</label><input type="date" value="'+asisFecha+'" onchange="asisFecha=this.value;renderAsistencia()"/></div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">'+
+    AEST_EMOJI.map(function(e,i){return'<div class="stat-box"><div style="font-size:18px">'+e+'</div><div style="font-size:18px;font-weight:800;color:'+ACOL[i]+'">'+counts[i]+'</div><div style="font-size:9px;color:'+ACOL[i]+';font-weight:700">'+ALBL[i]+'</div></div>';}).join('')+'</div>'+
+    '<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+    '<span style="color:var(--muted);font-size:12px">Toca el icono para cambiar estado</span>'+
+    '<span style="font-weight:800;color:var(--green)">'+counts[0]+'/'+activos.length+'</span></div>';
+  if(activos.length===0)h+='<div style="text-align:center;color:var(--muted);padding:30px">Sin alumnos activos en este grupo</div>';
+  activos.forEach(function(a){
+    var est=reg[a.id]||"A";var idx=AEST_RAW.indexOf(est);if(idx<0)idx=1;var col=ACOL[idx];
+    var asistP=calcAsistencia(a.id);
+    h+='<div class="item" style="border-color:'+col+'40">'+cinBadge(a.cinturon)+
+      '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+a.nombre+'</div>'+
+      '<div style="font-size:11px;color:'+col+';font-weight:700;margin-top:2px">'+ALBL[idx]+' <span style="color:var(--muted);font-weight:600">· '+asistP.pct+'% mes</span></div></div>'+
+      '<button onclick="toggleAsis(\''+a.id+'\')" style="font-size:24px;background:none;border:2px solid '+col+';border-radius:11px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+AEST_EMOJI[idx]+'</button></div>';
+  });
+  document.getElementById("content").innerHTML=h;
+}
+async function toggleAsis(id){
+  var reg=DB.asistencia[asisFecha]||{};
+  var curr=AEST_RAW.indexOf(reg[id]||"A");if(curr<0)curr=1;
+  reg[id]=AEST_RAW[(curr+1)%AEST_RAW.length];
+  DB.asistencia[asisFecha]=reg;
+  await saveAsistencia();renderAsistencia();
+}
+
+// ── PAGOS ───────────────────────────────────────────────────────────────────
+function renderPagos(){
+  var key=pagoAno+"-"+pagoMes;var reg=DB.pagos[key]||{};
+  var activos=DB.alumnos.filter(function(a){return a.grupo===pagoGrupo&&a.estado==="Activo";});
+  var pagados=activos.filter(function(a){return reg[a.id]==="OK";}).length;
+  var parciales=activos.filter(function(a){return reg[a.id]==="P";}).length;
+  var pendientes=activos.filter(function(a){return !reg[a.id]||reg[a.id]==="N";}).length;
+  var recaudado=activos.reduce(function(s,a){if(reg[a.id]==="OK")return s+(a.cuota||0);if(reg[a.id]==="P")return s+Math.round((a.cuota||0)/2);return s;},0);
+  var deuda=activos.reduce(function(s,a){return(!reg[a.id]||reg[a.id]==="N")?s+(a.cuota||0):s;},0);
+  var h='<div class="gtabs">'+
+    '<button class="gtab'+(pagoGrupo==="ninos"?" active":"")+'" onclick="pagoGrupo=\'ninos\';renderPagos()">👦 Ninos</button>'+
+    '<button class="gtab'+(pagoGrupo==="jovenes"?" active":"")+'" onclick="pagoGrupo=\'jovenes\';renderPagos()">🧑 Jovenes</button></div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+    '<select style="flex:1" onchange="pagoMes=+this.value;renderPagos()">'+MESES.map(function(m,i){return'<option value="'+i+'"'+(i===pagoMes?" selected":"")+'>'+m+'</option>';}).join('')+'</select>'+
+    '<select style="width:86px" onchange="pagoAno=+this.value;renderPagos()">'+"2024,2025,2026,2027".split(",").map(function(y){return'<option'+(+y===pagoAno?" selected":"")+'>'+y+'</option>';}).join('')+'</select></div>'+
+    '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between">'+
+    '<div><div style="font-size:10px;color:var(--muted);font-weight:700">RECAUDADO</div><div style="font-size:26px;font-weight:800;color:var(--green)">$'+recaudado.toLocaleString()+'</div></div>'+
+    '<div style="text-align:right"><div style="font-size:10px;color:var(--muted);font-weight:700">DEUDA</div><div style="font-size:26px;font-weight:800;color:var(--red)">$'+deuda.toLocaleString()+'</div></div></div></div>'+
+    '<div class="stats-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--green)">'+pagados+'</div><div class="stat-l">Pagados</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:#f59e0b">'+parciales+'</div><div class="stat-l">Parcial</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--red)">'+pendientes+'</div><div class="stat-l">Pendiente</div></div></div>';
+  if(pendientes>0)h+='<button class="btn btn-wa" onclick="modalAlertas()" style="margin-bottom:12px">📲 Enviar alertas WhatsApp ('+pendientes+')</button>';
+  if(activos.length===0)h+='<div style="text-align:center;color:var(--muted);padding:30px">Sin alumnos activos</div>';
+  activos.forEach(function(a){
+    var est=reg[a.id]||"N";
+    h+='<div class="card"><div style="display:flex;align-items:center;gap:11px">'+cinBadge(a.cinturon,38)+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+a.nombre+'</div>'+
+      '<div style="font-size:11px;color:var(--muted)">Cuota: $'+(a.cuota||0).toLocaleString()+'</div></div></div>'+
+      '<div class="popts">'+
+      '<button class="popt'+(est==="OK"?" pg":"")+'" onclick="setPago(\''+a.id+'\',\'OK\')">✅<br/>Pagado</button>'+
+      '<button class="popt'+(est==="P"?" po":"")+'" onclick="setPago(\''+a.id+'\',\'P\')">🔄<br/>Parcial</button>'+
+      '<button class="popt'+(est==="N"?" pr":"")+'" onclick="setPago(\''+a.id+'\',\'N\')">❌<br/>Pendiente</button>'+
+      '</div></div>';
+  });
+  document.getElementById("content").innerHTML=h;
+}
+async function setPago(id,est){
+  var key=pagoAno+"-"+pagoMes;if(!DB.pagos[key])DB.pagos[key]={};
+  DB.pagos[key][id]=est;await savePagos();renderPagos();
+}
+function modalAlertas(){
+  var key=pagoAno+"-"+pagoMes;var reg=DB.pagos[key]||{};
+  var pend=DB.alumnos.filter(function(a){return a.grupo===pagoGrupo&&a.estado==="Activo"&&(!reg[a.id]||reg[a.id]==="N");});
+  var mesNombre=MESES[pagoMes]+" "+pagoAno;var sede=sedeActual();
+  var h='<p style="color:var(--muted);font-size:13px;margin-bottom:14px">Toca WA para abrir WhatsApp con el mensaje listo. Para ninos va dirigido al apoderado.</p>';
+  pend.forEach(function(a){
+    var esNino=a.grupo==="ninos";
+    var tel=esNino?(a.apodTel||a.tel||""):(a.tel||"");
+    var telLimpio=limpiarTel(tel);
+    var dest=esNino&&a.apodNombre?a.apodNombre:"";
+    var saludo=dest?"Hola "+dest+", apoderado de "+a.nombre+",":"Hola "+a.nombre+",";
+    var msg=saludo+" le recordamos el pago de "+mesNombre+" en "+sede.nombre+". Monto: $"+(a.cuota||0).toLocaleString()+". Gracias!";
+    var waUrl=telLimpio?"https://wa.me/56"+telLimpio+"?text="+encodeURIComponent(msg):"";
+    h+='<div class="wa-item">'+cinBadge(a.cinturon,38)+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+a.nombre+'</div>'+
+      (esNino&&a.apodNombre?'<div style="font-size:11px;color:#f59e0b">Apod: '+a.apodNombre+'</div>':'')+
+      '<div style="font-size:11px;color:var(--muted)">$'+(a.cuota||0).toLocaleString()+' - '+(tel||"Sin tel")+'</div></div>'+
+      (waUrl?'<a href="'+waUrl+'" target="_blank" style="background:#25d366;border-radius:10px;padding:10px 12px;color:#fff;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0">📲 WA</a>':
+      '<span style="font-size:11px;color:var(--muted);flex-shrink:0">Sin tel</span>')+'</div>';
+  });
+  openModal("Alertas de pago",h);
+}
+
+// ── EXAMENES (con historial automático) ─────────────────────────────────────
+function renderExamenes(){
+  var exams=DB.examenes.filter(function(e){var a=DB.alumnos.find(function(x){return x.id==e.alumnoId;});return a&&a.grupo===examGrupo;});
+  var aprob=exams.filter(function(e){return e.resultado==="Aprobado";}).length;
+  var pendP=exams.filter(function(e){return !e.pagado;}).length;
+  // candidatos a examen
+  var candidatos=DB.alumnos.filter(function(a){return a.grupo===examGrupo&&a.estado==="Activo"&&calcRequisitosExamen(a).ok;});
+  var h='<div class="gtabs">'+
+    '<button class="gtab'+(examGrupo==="ninos"?" active":"")+'" onclick="examGrupo=\'ninos\';renderExamenes()">👦 Ninos</button>'+
+    '<button class="gtab'+(examGrupo==="jovenes"?" active":"")+'" onclick="examGrupo=\'jovenes\';renderExamenes()">🧑 Jovenes</button></div>'+
+    '<div class="stats-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">'+
+    '<div class="stat-box"><div class="stat-n">'+exams.length+'</div><div class="stat-l">Total</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--green)">'+aprob+'</div><div class="stat-l">Aprobados</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--red)">'+pendP+'</div><div class="stat-l">Pend. pago</div></div></div>';
+  if(candidatos.length>0){
+    h+='<div class="card" style="border-color:var(--green);background:#22c55e10;margin-bottom:12px">'+
+      '<div style="font-weight:800;color:var(--green);margin-bottom:6px">🎯 '+candidatos.length+' alumno(s) listo(s) para examen</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Cumplen tiempo en grado y asistencia mínima</div>'+
+      candidatos.slice(0,5).map(function(a){return'<div style="font-size:13px;padding:3px 0">• '+a.nombre+' <span style="color:var(--muted)">→ '+nextCinturon(a.cinturon)+'</span></div>';}).join('')+
+      (candidatos.length>5?'<div style="font-size:12px;color:var(--muted);margin-top:4px">... y '+(candidatos.length-5)+' más</div>':'')+
+      '</div>';
+  }
+  h+='<button class="btn btn-red" style="margin-bottom:12px" onclick="modalNuevoExamen()">+ Registrar examen</button>';
+  if(exams.length===0)h+='<div style="text-align:center;color:var(--muted);padding:30px">Sin examenes en este grupo</div>';
+  exams.slice().reverse().forEach(function(ex){
+    var a=DB.alumnos.find(function(x){return x.id==ex.alumnoId;});
+    var prom=ex.notaTec&&ex.notaAct?((+ex.notaTec+(+ex.notaAct))/2).toFixed(1):"-";
+    var col=ex.resultado==="Aprobado"?"#22c55e":ex.resultado==="Reprobado"?"#e63946":"#f59e0b";
+    h+='<div class="card" style="border-color:'+col+'40;cursor:pointer" onclick="modalVerExamen(\''+ex.id+'\')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(a?a.nombre:"-")+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+ex.fecha+' - '+(ex.cinturonActual||"?")+' a '+(ex.cinturonObtener||"?")+'</div></div>'+
+      '<div class="ebig" style="color:'+(+prom>=6?"#22c55e":+prom>0?"#e63946":"var(--muted)")+'">'+prom+'</div></div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+tag(ex.resultado,col)+' '+tag(ex.pagado?"Pagado":"Pend.",ex.pagado?"#22c55e":"#e63946")+'</div></div>';
+  });
+  document.getElementById("content").innerHTML=h;
+}
+function nextCinturon(c){var idx=CIN.indexOf(c);if(idx<0||idx>=CIN.length-1)return c;return CIN[idx+1];}
+function formExamenHTML(ex){
+  var al=DB.alumnos.filter(function(a){return a.grupo===examGrupo&&a.estado==="Activo";});
+  var prom=ex&&ex.notaTec&&ex.notaAct?((+ex.notaTec+(+ex.notaAct))/2).toFixed(1):"-";
+  return'<div class="field"><label>Alumno *</label><select id="ex-a" onchange="onSelAlumnoExamen()"><option value="">Seleccionar...</option>'+
+    al.map(function(a){return'<option value="'+a.id+'"'+(ex&&ex.alumnoId==a.id?" selected":"")+'>'+a.nombre+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>Fecha</label><input type="date" id="ex-fecha" value="'+(ex&&ex.fecha||HOY)+'"/></div>'+
+    '<div class="g2"><div class="field"><label>Cinturon actual</label>'+cinSel("ex-ca",ex&&ex.cinturonActual||"Blanco")+'</div>'+
+    '<div class="field"><label>A obtener</label>'+cinSel("ex-co",ex&&ex.cinturonObtener||"Blanco-Amarillo")+'</div></div>'+
+    '<div class="g2"><div class="field"><label>Nota tecnica (1-10)</label><input type="number" min="1" max="10" id="ex-tec" value="'+(ex&&ex.notaTec||"")+'" oninput="updProm()"/></div>'+
+    '<div class="field"><label>Nota actitud (1-10)</label><input type="number" min="1" max="10" id="ex-act" value="'+(ex&&ex.notaAct||"")+'" oninput="updProm()"/></div></div>'+
+    '<div class="card2" style="text-align:center;margin-bottom:12px">'+
+    '<div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:2px">PROMEDIO</div>'+
+    '<div id="pd" style="font-size:44px;font-weight:800;line-height:1;color:'+(+prom>=6?"#22c55e":+prom>0?"#e63946":"var(--muted)")+'">'+prom+'</div></div>'+
+    '<div class="field"><label>Resultado</label><select id="ex-res">'+
+    ["Aprobado","Reprobado","En revision"].map(function(r){return'<option'+(ex&&ex.resultado===r?" selected":"")+'>'+r+'</option>';}).join('')+'</select></div>'+
+    '<div class="g2"><div class="field"><label>Monto $</label><input type="number" id="ex-monto" value="'+(ex&&ex.montoPago||0)+'"/></div>'+
+    '<div class="field"><label>Estado pago</label><select id="ex-pago">'+
+    '<option value="si"'+(ex&&ex.pagado?" selected":"")+'>Pagado</option>'+
+    '<option value="no"'+(!ex||!ex.pagado?" selected":"")+'>Pendiente</option></select></div></div>'+
+    '<div class="field"><label>Observaciones</label><textarea id="ex-obs" rows="2" style="resize:none">'+(ex&&ex.obs||"")+'</textarea></div>'+
+    '<div style="display:flex;gap:8px;margin-top:4px">'+
+    '<button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarExamen(\''+(ex&&ex.id||"")+'\')">Guardar</button></div>';
+}
+function onSelAlumnoExamen(){
+  var aid=document.getElementById("ex-a").value;if(!aid)return;
+  var a=DB.alumnos.find(function(x){return x.id===aid;});if(!a)return;
+  document.getElementById("ex-ca").value=a.cinturon;
+  document.getElementById("ex-co").value=nextCinturon(a.cinturon);
+}
+function updProm(){
+  var t=+(document.getElementById("ex-tec")||{}).value,a=+(document.getElementById("ex-act")||{}).value;
+  var el=document.getElementById("pd");if(!el)return;
+  if(t&&a){var p=((t+a)/2).toFixed(1);el.textContent=p;el.style.color=p>=6?"#22c55e":"#e63946";}
+  else{el.textContent="-";el.style.color="var(--muted)";}
+}
+function modalNuevoExamen(){openModal("Nuevo examen",formExamenHTML(null));}
+function modalVerExamen(id){
+  var ex=DB.examenes.find(function(e){return e.id===id;});if(!ex)return;
+  var a=DB.alumnos.find(function(x){return x.id==ex.alumnoId;});
+  var prom=ex.notaTec&&ex.notaAct?((+ex.notaTec+(+ex.notaAct))/2).toFixed(1):"-";
+  var col=ex.resultado==="Aprobado"?"#22c55e":ex.resultado==="Reprobado"?"#e63946":"#f59e0b";
+  openModal("Examen",
+    '<div class="card2" style="margin-bottom:14px"><div style="font-weight:800;font-size:16px;margin-bottom:3px">'+(a?a.nombre:"-")+'</div>'+
+    '<div style="font-size:12px;color:var(--muted)">'+ex.fecha+'</div>'+
+    '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+tag((ex.cinturonActual||"?")+" a "+(ex.cinturonObtener||"?"),"#888")+" "+tag(ex.resultado,col)+'</div></div>'+
+    [["Nota tecnica",ex.notaTec||"-"],["Nota actitud",ex.notaAct||"-"],["Promedio",prom],["Monto","$"+(ex.montoPago||0).toLocaleString()],["Pago",ex.pagado?"Pagado":"Pendiente"],["Obs.",ex.obs||"-"]].map(function(x){
+      return'<div style="display:flex;gap:10px;margin-bottom:9px;font-size:13px"><span style="color:var(--muted);min-width:100px;flex-shrink:0">'+x[0]+'</span><span style="font-weight:600">'+x[1]+'</span></div>';
+    }).join('')+
+    '<div class="div"></div><div style="display:flex;gap:8px">'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="openModal(\'Editar examen\',formExamenHTML(DB.examenes.find(function(e){return e.id===\''+id+'\';})))">✏ Editar</button>'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="eliminarExamen(\''+id+'\')">🗑 Eliminar</button></div>');
+}
+async function guardarExamen(id){
+  var g=function(k){var el=document.getElementById(k);return el?el.value:"";};
+  var aid=g("ex-a");if(!aid){alert("Selecciona un alumno");return;}
+  var obj={alumnoId:aid,fecha:g("ex-fecha"),cinturonActual:g("ex-ca"),cinturonObtener:g("ex-co"),notaTec:g("ex-tec"),notaAct:g("ex-act"),resultado:g("ex-res"),montoPago:+(g("ex-monto"))||0,pagado:g("ex-pago")==="si",obs:g("ex-obs")};
+  if(id){obj.id=id;DB.examenes=DB.examenes.map(function(e){return e.id===id?Object.assign({},e,obj):e;});}
+  else{obj.id="ex"+Date.now();DB.examenes.push(obj);}
+  await saveExamen(obj);
+  // si aprobó, actualizar cinturón del alumno automáticamente (historial se infiere de exámenes)
+  if(obj.resultado==="Aprobado"){
+    var al=DB.alumnos.find(function(a){return a.id===obj.alumnoId;});
+    if(al&&CIN.indexOf(obj.cinturonObtener)>CIN.indexOf(al.cinturon||"Blanco")){
+      al.cinturon=obj.cinturonObtener;
+      al.fechaCinturonActual=obj.fecha;
+      await saveAlumno(al);
+      toast("Cinturón actualizado a "+obj.cinturonObtener);
+    }
+  }
+  closeModal();renderExamenes();
+}
+async function eliminarExamen(id){
+  if(!confirm("Eliminar este examen?"))return;
+  DB.examenes=DB.examenes.filter(function(e){return e.id!==id;});
+  await delExamen(id);closeModal();renderExamenes();
+}
+
+// ── CURRÍCULUM TÉCNICO ──────────────────────────────────────────────────────
+function renderCurriculum(){
+  // El currículum se almacena como DB.curriculum[cinturon] = [{cat, nombre, ko, desc}, ...]
+  var h='<div style="font-size:13px;color:var(--muted);margin-bottom:14px">📚 Programa técnico por cinturón. Cada cinturón es independiente.</div>';
+  CIN.forEach(function(c){
+    var lista=DB.curriculum[c]||[];
+    h+='<div class="card" style="cursor:pointer" onclick="modalCurriculum(\''+c+'\')">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+cinBadge(c,40)+
+      '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+c+'</div>'+
+      '<div style="font-size:11px;color:var(--muted)">'+(lista.length===0?"Sin contenido":lista.length+" técnica(s)")+'</div></div>'+
+      '<span style="color:var(--red);font-size:18px">›</span></div></div>';
+  });
+  document.getElementById("content").innerHTML=h;
+}
+function modalCurriculum(c){
+  var lista=DB.curriculum[c]||[];
+  var h='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+cinBadge(c,48)+
+    '<div><div style="font-weight:800;font-size:15px">'+c+'</div><div style="font-size:11px;color:var(--muted)">'+lista.length+' técnica(s)</div></div></div>';
+
+  if(lista.length===0){
+    h+='<div style="text-align:center;color:var(--muted);padding:20px 0">Sin contenido todavía</div>';
+  } else {
+    // agrupar por categoría
+    var porCat={};lista.forEach(function(t,i){if(!porCat[t.cat])porCat[t.cat]=[];porCat[t.cat].push(Object.assign({_i:i},t));});
+    Object.keys(porCat).forEach(function(cat){
+      h+='<div style="font-size:11px;color:var(--red);font-weight:800;margin:10px 0 6px;text-transform:uppercase;letter-spacing:1px">'+cat+'</div>';
+      h+='<div class="curr-list">';
+      porCat[cat].forEach(function(t){
+        h+='<div class="curr-tech"><div style="flex:1"><div>'+t.nombre+'</div>'+
+          (t.ko?'<div class="ko">'+t.ko+'</div>':'')+
+          (t.desc?'<div style="font-size:11px;color:var(--muted);margin-top:3px">'+t.desc+'</div>':'')+
+          '</div><button class="del" onclick="eliminarTecnica(\''+c+'\','+t._i+')">🗑</button></div>';
+      });
+      h+='</div>';
+    });
+  }
+  h+='<div class="div"></div><button class="btn btn-red" onclick="modalNuevaTecnica(\''+c+'\')">+ Agregar técnica</button>';
+  openModal("Programa: "+c,h);
+}
+function modalNuevaTecnica(c){
+  openModal("Nueva técnica · "+c,
+    '<div class="field"><label>Categoría</label><select id="t-cat">'+
+    CAT_TECNICAS.map(function(x){return'<option>'+x+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>Nombre / técnica *</label><input id="t-nombre" placeholder="ej: Patada frontal"/></div>'+
+    '<div class="field"><label>Término coreano</label><input id="t-ko" placeholder="ej: Ap chagi"/></div>'+
+    '<div class="field"><label>Descripción / detalles</label><textarea id="t-desc" rows="2" style="resize:none"></textarea></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="modalCurriculum(\''+c+'\')">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarTecnica(\''+c+'\')">Agregar</button></div>');
+}
+async function guardarTecnica(c){
+  var nombre=document.getElementById("t-nombre").value.trim();
+  if(!nombre){alert("Ingresa el nombre");return;}
+  var obj={cat:document.getElementById("t-cat").value,nombre:nombre,ko:document.getElementById("t-ko").value,desc:document.getElementById("t-desc").value};
+  if(!DB.curriculum[c])DB.curriculum[c]=[];
+  DB.curriculum[c].push(obj);
+  await saveCurriculum();
+  modalCurriculum(c);
+  toast("Técnica agregada");
+}
+async function eliminarTecnica(c,i){
+  if(!confirm("Eliminar esta técnica?"))return;
+  DB.curriculum[c].splice(i,1);
+  await saveCurriculum();
+  modalCurriculum(c);
+}
+
+// ── CALENDARIO Y EVENTOS ────────────────────────────────────────────────────
+function renderCalendario(){
+  var primer=new Date(calAno,calMes,1);
+  var primerDia=(primer.getDay()+6)%7; // lunes=0
+  var ultimo=new Date(calAno,calMes+1,0).getDate();
+  var sede=sedeActual();
+  var diasEntrena=(sede.dias||[]).map(function(d){return DIAS_SEMANA.indexOf(d);});
+
+  var h='<div class="card2" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+    '<button onclick="calMes--;if(calMes<0){calMes=11;calAno--}renderCalendario()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:6px 12px;font-size:18px">‹</button>'+
+    '<div style="font-weight:800;font-size:15px">'+MESES[calMes]+' '+calAno+'</div>'+
+    '<button onclick="calMes++;if(calMes>11){calMes=0;calAno++}renderCalendario()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:#fff;padding:6px 12px;font-size:18px">›</button></div>'+
+    '<div class="cal-grid">';
+  DIAS_SEMANA.forEach(function(d){h+='<div class="cal-head">'+d+'</div>';});
+  for(var i=0;i<primerDia;i++)h+='<div class="cal-day empty"></div>';
+  for(var d=1;d<=ultimo;d++){
+    var fechaStr=calAno+"-"+String(calMes+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    var esHoy=fechaStr===HOY;
+    var fechaObj=new Date(calAno,calMes,d);
+    var diaSemana=(fechaObj.getDay()+6)%7;
+    var esEntrena=diasEntrena.indexOf(diaSemana)>-1;
+    var evs=DB.eventos.filter(function(e){return e.fecha===fechaStr;});
+    var clase="cal-day"+(esHoy?" today":"")+(evs.length>0?" has-event":esEntrena?" training":"");
+    h+='<div class="'+clase+'" onclick="modalEventosDia(\''+fechaStr+'\')">'+
+      '<div class="num">'+d+'</div>'+
+      (evs.length>0?'<div class="ev-dot"></div>':'')+
+      '</div>';
+  }
+  h+='</div>';
+  // próximos eventos
+  var prox=DB.eventos.filter(function(e){return e.fecha>=HOY;}).sort(function(a,b){return a.fecha<b.fecha?-1:1;}).slice(0,5);
+  h+='<div class="dash-section-title" style="margin-top:18px">Próximos eventos</div>';
+  if(prox.length===0){h+='<div style="text-align:center;color:var(--muted);padding:20px">Sin eventos próximos</div>';}
+  else{
+    prox.forEach(function(e){
+      h+='<div class="evt-item tipo-'+(e.tipo||"otro").toLowerCase()+'" onclick="modalVerEvento(\''+e.id+'\')">'+
+        '<div class="evt-date">'+e.fecha+(e.hora?" · "+e.hora:"")+'</div>'+
+        '<div class="evt-title">'+e.titulo+'</div>'+
+        '<div class="evt-meta">'+e.tipo+(e.lugar?" · "+e.lugar:"")+'</div></div>';
+    });
+  }
+  h+='<button class="btn btn-red" style="margin-top:14px" onclick="modalNuevoEvento()">+ Nuevo evento</button>';
+  document.getElementById("content").innerHTML=h;
+}
+function modalEventosDia(fecha){
+  var evs=DB.eventos.filter(function(e){return e.fecha===fecha;});
+  var h='<div style="color:var(--muted);font-size:13px;margin-bottom:12px">'+fecha+'</div>';
+  if(evs.length===0){h+='<div style="text-align:center;color:var(--muted);padding:20px">Sin eventos este día</div>';}
+  else{
+    evs.forEach(function(e){
+      h+='<div class="evt-item tipo-'+(e.tipo||"otro").toLowerCase()+'" onclick="modalVerEvento(\''+e.id+'\')">'+
+        '<div class="evt-date">'+(e.hora||"Todo el día")+'</div>'+
+        '<div class="evt-title">'+e.titulo+'</div>'+
+        '<div class="evt-meta">'+e.tipo+(e.lugar?" · "+e.lugar:"")+'</div></div>';
+    });
+  }
+  h+='<button class="btn btn-red" style="margin-top:12px" onclick="modalNuevoEvento(\''+fecha+'\')">+ Agregar evento este día</button>';
+  openModal("Eventos",h);
+}
+function modalNuevoEvento(fecha){
+  fecha=fecha||HOY;
+  openModal("Nuevo evento",
+    '<div class="field"><label>Título *</label><input id="ev-titulo" placeholder="ej: Examen de cinturón"/></div>'+
+    '<div class="field"><label>Tipo</label><select id="ev-tipo">'+TIPOS_EVENTO.map(function(t){return'<option>'+t+'</option>';}).join('')+'</select></div>'+
+    '<div class="g2"><div class="field"><label>Fecha</label><input type="date" id="ev-fecha" value="'+fecha+'"/></div>'+
+    '<div class="field"><label>Hora</label><input type="time" id="ev-hora"/></div></div>'+
+    '<div class="field"><label>Lugar</label><input id="ev-lugar"/></div>'+
+    '<div class="field"><label>Descripción</label><textarea id="ev-desc" rows="3" style="resize:none"></textarea></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarEvento(\'\')">Guardar</button></div>');
+}
+function modalVerEvento(id){
+  var e=DB.eventos.find(function(x){return x.id===id;});if(!e)return;
+  openModal("Evento",
+    '<div class="card2" style="margin-bottom:14px">'+
+    '<div style="font-weight:800;font-size:16px">'+e.titulo+'</div>'+
+    '<div style="margin-top:6px">'+tag(e.tipo,"#e63946")+'</div></div>'+
+    [["Fecha",e.fecha],["Hora",e.hora],["Lugar",e.lugar],["Descripción",e.desc]].filter(function(x){return x[1];}).map(function(x){
+      return'<div style="display:flex;gap:10px;margin-bottom:9px;font-size:13px"><span style="color:var(--muted);min-width:90px">'+x[0]+'</span><span style="font-weight:600">'+x[1]+'</span></div>';
+    }).join('')+
+    '<div class="div"></div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="modalEditarEvento(\''+id+'\')">✏ Editar</button>'+
+    '<button class="btn btn-outline-red" style="width:50%" onclick="eliminarEvento(\''+id+'\')">🗑 Eliminar</button></div>');
+}
+function modalEditarEvento(id){
+  var e=DB.eventos.find(function(x){return x.id===id;});if(!e)return;
+  openModal("Editar evento",
+    '<div class="field"><label>Título *</label><input id="ev-titulo" value="'+e.titulo+'"/></div>'+
+    '<div class="field"><label>Tipo</label><select id="ev-tipo">'+TIPOS_EVENTO.map(function(t){return'<option'+(t===e.tipo?" selected":"")+'>'+t+'</option>';}).join('')+'</select></div>'+
+    '<div class="g2"><div class="field"><label>Fecha</label><input type="date" id="ev-fecha" value="'+e.fecha+'"/></div>'+
+    '<div class="field"><label>Hora</label><input type="time" id="ev-hora" value="'+(e.hora||"")+'"/></div></div>'+
+    '<div class="field"><label>Lugar</label><input id="ev-lugar" value="'+(e.lugar||"")+'"/></div>'+
+    '<div class="field"><label>Descripción</label><textarea id="ev-desc" rows="3" style="resize:none">'+(e.desc||"")+'</textarea></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarEvento(\''+id+'\')">Guardar</button></div>');
+}
+async function guardarEvento(id){
+  var g=function(k){var el=document.getElementById(k);return el?el.value:"";};
+  var titulo=g("ev-titulo").trim();if(!titulo){alert("Ingresa el título");return;}
+  var obj={titulo:titulo,tipo:g("ev-tipo"),fecha:g("ev-fecha"),hora:g("ev-hora"),lugar:g("ev-lugar"),desc:g("ev-desc")};
+  if(id){obj.id=id;DB.eventos=DB.eventos.map(function(e){return e.id===id?Object.assign({},e,obj):e;});}
+  else{obj.id="ev"+Date.now();DB.eventos.push(obj);}
+  await saveEvento(obj);closeModal();renderCalendario();
+  toast("Evento guardado");
+}
+async function eliminarEvento(id){
+  if(!confirm("Eliminar este evento?"))return;
+  DB.eventos=DB.eventos.filter(function(e){return e.id!==id;});
+  await delEvento(id);closeModal();renderCalendario();
+}
+
+// ── COMPETENCIAS ────────────────────────────────────────────────────────────
+function renderCompetencias(){
+  var comps=DB.competencias.filter(function(c){var a=DB.alumnos.find(function(x){return x.id==c.alumnoId;});return a&&a.grupo===compGrupo;});
+  var totalMedallas=comps.reduce(function(s,c){return s+(c.medalla&&c.medalla!=="Sin medalla"?1:0);},0);
+  var oro=comps.filter(function(c){return c.medalla==="Oro";}).length;
+  var plata=comps.filter(function(c){return c.medalla==="Plata";}).length;
+  var bronce=comps.filter(function(c){return c.medalla==="Bronce";}).length;
+  var h='<div class="gtabs">'+
+    '<button class="gtab'+(compGrupo==="ninos"?" active":"")+'" onclick="compGrupo=\'ninos\';renderCompetencias()">👦 Ninos</button>'+
+    '<button class="gtab'+(compGrupo==="jovenes"?" active":"")+'" onclick="compGrupo=\'jovenes\';renderCompetencias()">🧑 Jovenes</button></div>'+
+    '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-around;text-align:center">'+
+    '<div><div style="font-size:24px">🥇</div><div style="font-size:18px;font-weight:800;color:#f4c430">'+oro+'</div></div>'+
+    '<div><div style="font-size:24px">🥈</div><div style="font-size:18px;font-weight:800;color:#c0c0c0">'+plata+'</div></div>'+
+    '<div><div style="font-size:24px">🥉</div><div style="font-size:18px;font-weight:800;color:#cd7f32">'+bronce+'</div></div>'+
+    '<div><div style="font-size:24px">🏆</div><div style="font-size:18px;font-weight:800">'+totalMedallas+'</div></div></div></div>'+
+    '<button class="btn btn-red" style="margin-bottom:12px" onclick="modalNuevaCompetencia()">+ Registrar competencia</button>';
+  if(comps.length===0)h+='<div style="text-align:center;color:var(--muted);padding:30px">Sin registros en este grupo</div>';
+  comps.slice().reverse().forEach(function(c){
+    var a=DB.alumnos.find(function(x){return x.id==c.alumnoId;});
+    var medEmoji=c.medalla==="Oro"?"🥇":c.medalla==="Plata"?"🥈":c.medalla==="Bronce"?"🥉":"";
+    h+='<div class="card" style="cursor:pointer" onclick="modalVerCompetencia(\''+c.id+'\')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">'+(a?a.nombre:"-")+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+c.fecha+' · '+(c.torneo||"-")+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+(c.modalidad||"-")+' · '+(c.categoria||"-")+'</div></div>'+
+      '<div style="font-size:30px">'+medEmoji+'</div></div></div>';
+  });
+  document.getElementById("content").innerHTML=h;
+}
+function modalNuevaCompetencia(){
+  var al=DB.alumnos.filter(function(a){return a.grupo===compGrupo&&a.estado==="Activo";});
+  openModal("Nueva competencia",
+    '<div class="field"><label>Alumno *</label><select id="co-a"><option value="">Seleccionar...</option>'+
+    al.map(function(a){return'<option value="'+a.id+'">'+a.nombre+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>Torneo / evento *</label><input id="co-torneo" placeholder="ej: Copa Regional 2026"/></div>'+
+    '<div class="field"><label>Fecha</label><input type="date" id="co-fecha" value="'+HOY+'"/></div>'+
+    '<div class="field"><label>Lugar</label><input id="co-lugar"/></div>'+
+    '<div class="g2"><div class="field"><label>Modalidad</label><select id="co-modalidad">'+
+    '<option>Combate</option><option>Poomsae</option><option>Rompimiento</option><option>Poomsae por equipos</option><option>Otra</option></select></div>'+
+    '<div class="field"><label>Categoría</label><input id="co-categoria" placeholder="ej: -45kg sub17"/></div></div>'+
+    '<div class="field"><label>Medalla</label><select id="co-medalla">'+
+    '<option>Sin medalla</option><option>Oro</option><option>Plata</option><option>Bronce</option></select></div>'+
+    '<div class="field"><label>Posición / lugar</label><input id="co-posicion" placeholder="ej: 1°, 4°, eliminado octavos"/></div>'+
+    '<div class="field"><label>Observaciones</label><textarea id="co-obs" rows="2" style="resize:none"></textarea></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-outline" style="width:50%" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-red" style="width:50%" onclick="guardarCompetencia(\'\')">Guardar</button></div>');
+}
+function modalVerCompetencia(id){
+  var c=DB.competencias.find(function(x){return x.id===id;});if(!c)return;
+  var a=DB.alumnos.find(function(x){return x.id==c.alumnoId;});
+  var medEmoji=c.medalla==="Oro"?"🥇":c.medalla==="Plata"?"🥈":c.medalla==="Bronce"?"🥉":"🏆";
+  openModal("Competencia",
+    '<div class="card2" style="margin-bottom:14px;text-align:center">'+
+    '<div style="font-size:60px">'+medEmoji+'</div>'+
+    '<div style="font-weight:800;font-size:16px;margin-top:6px">'+(a?a.nombre:"-")+'</div>'+
+    '<div style="font-size:13px;color:var(--muted)">'+c.medalla+'</div></div>'+
+    [["Torneo",c.torneo],["Fecha",c.fecha],["Lugar",c.lugar],["Modalidad",c.modalidad],["Categoría",c.categoria],["Posición",c.posicion],["Obs.",c.obs]].filter(function(x){return x[1];}).map(function(x){
+      return'<div style="display:flex;gap:10px;margin-bottom:9px;font-size:13px"><span style="color:var(--muted);min-width:100px">'+x[0]+'</span><span style="font-weight:600">'+x[1]+'</span></div>';
+    }).join('')+
+    '<div class="div"></div>'+
+    '<button class="btn btn-outline-red" onclick="eliminarCompetencia(\''+id+'\')">🗑 Eliminar</button>');
+}
+async function guardarCompetencia(id){
+  var g=function(k){var el=document.getElementById(k);return el?el.value:"";};
+  var aid=g("co-a");if(!aid){alert("Selecciona un alumno");return;}
+  var torneo=g("co-torneo").trim();if(!torneo){alert("Ingresa el torneo");return;}
+  var obj={alumnoId:aid,torneo:torneo,fecha:g("co-fecha"),lugar:g("co-lugar"),modalidad:g("co-modalidad"),categoria:g("co-categoria"),medalla:g("co-medalla"),posicion:g("co-posicion"),obs:g("co-obs")};
+  if(id){obj.id=id;DB.competencias=DB.competencias.map(function(c){return c.id===id?Object.assign({},c,obj):c;});}
+  else{obj.id="co"+Date.now();DB.competencias.push(obj);}
+  await saveCompetencia(obj);closeModal();renderCompetencias();
+  toast("Competencia registrada");
+}
+async function eliminarCompetencia(id){
+  if(!confirm("Eliminar este registro?"))return;
+  DB.competencias=DB.competencias.filter(function(c){return c.id!==id;});
+  await delCompetencia(id);closeModal();renderCompetencias();
+}
+
+// ── COMUNICADOS MASIVOS ─────────────────────────────────────────────────────
+var comuTipo="todos",comuGrupo="todos",comuPlantilla="";
+function renderComunicados(){
+  var sede=sedeActual();
+  var plantillas={
+    "":"-- Seleccionar plantilla --",
+    "suspension":"Estimados, les informamos que la clase del día [FECHA] queda suspendida. Cualquier consulta nos avisan. Saludos cordiales, "+sede.nombre+".",
+    "recordatorio_clase":"Hola, les recordamos que mañana tenemos clase de Taekwondo en "+sede.nombre+". Los esperamos. ¡Saludos!",
+    "examen_proximo":"Estimados, les recordamos que el próximo examen de cinturón será el día [FECHA]. Para más información, consultar con el instructor. Saludos, "+sede.nombre+".",
+    "evento":"Estimados, les invitamos al evento [EVENTO] que se realizará el día [FECHA]. Esperamos contar con su participación. Saludos, "+sede.nombre+".",
+    "cumpleanos":"¡Feliz cumpleaños [NOMBRE]! De parte de toda la familia de "+sede.nombre+", te deseamos un excelente día.",
+    "personalizado":""
+  };
+  var actuales=DB.alumnos.filter(function(a){
+    if(a.estado!=="Activo")return false;
+    if(comuGrupo!=="todos"&&a.grupo!==comuGrupo)return false;
+    return true;
+  });
+  var conTel=actuales.filter(function(a){var t=a.grupo==="ninos"?(a.apodTel||a.tel):a.tel;return limpiarTel(t).length>0;}).length;
+
+  var h='<div style="font-size:13px;color:var(--muted);margin-bottom:14px">📢 Envía mensajes a varios alumnos / apoderados a la vez. Cada uno se abre en WhatsApp por separado.</div>'+
+    '<div class="field"><label>¿A quién enviar?</label><select id="cm-grupo" onchange="comuGrupo=this.value;renderComunicados()">'+
+    '<option value="todos"'+(comuGrupo==="todos"?" selected":"")+'>Todos los activos ('+actuales.length+')</option>'+
+    '<option value="ninos"'+(comuGrupo==="ninos"?" selected":"")+'>Solo Niños</option>'+
+    '<option value="jovenes"'+(comuGrupo==="jovenes"?" selected":"")+'>Solo Jóvenes</option>'+
+    '</select></div>'+
+    '<div class="field"><label>Plantilla</label><select id="cm-plantilla" onchange="comuPlantilla=this.value;document.getElementById(\'cm-msg\').value=this.options[this.selectedIndex].dataset.tpl||\'\';">'+
+    Object.keys(plantillas).map(function(k){return'<option value="'+k+'" data-tpl="'+plantillas[k].replace(/"/g,"&quot;")+'">'+(k===""?plantillas[k]:k.replace("_"," "))+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>Mensaje</label><textarea id="cm-msg" rows="5" placeholder="Escribe tu mensaje..."></textarea></div>'+
+    '<div class="alert-warn" style="font-size:12px">Usa [NOMBRE] para el nombre del alumno, [FECHA] para fecha, etc. Se reemplaza al enviar.</div>'+
+    '<div class="card2" style="margin-bottom:12px;text-align:center">'+
+    '<div style="font-size:11px;color:var(--muted);font-weight:700">DESTINATARIOS CON TELÉFONO</div>'+
+    '<div style="font-size:28px;font-weight:800;color:'+(conTel>0?"var(--green)":"var(--red)")+'">'+conTel+'</div></div>'+
+    '<button class="btn btn-wa" onclick="enviarComunicado()">📲 Generar enlaces WhatsApp</button>';
+  document.getElementById("content").innerHTML=h;
+}
+function enviarComunicado(){
+  var msg=document.getElementById("cm-msg").value.trim();
+  if(!msg){alert("Escribe el mensaje");return;}
+  var actuales=DB.alumnos.filter(function(a){
+    if(a.estado!=="Activo")return false;
+    if(comuGrupo!=="todos"&&a.grupo!==comuGrupo)return false;
+    return true;
+  });
+  var h='<p style="color:var(--muted);font-size:13px;margin-bottom:14px">Toca cada botón WA para abrir el chat. El nombre se reemplaza automáticamente.</p>';
+  var conTel=0;
+  actuales.forEach(function(a){
+    var esNino=a.grupo==="ninos";
+    var tel=esNino?(a.apodTel||a.tel||""):(a.tel||"");
+    var telLimpio=limpiarTel(tel);
+    var msgPers=msg.replace(/\[NOMBRE\]/g,a.nombre).replace(/\[APODERADO\]/g,a.apodNombre||"");
+    var waUrl=telLimpio?"https://wa.me/56"+telLimpio+"?text="+encodeURIComponent(msgPers):"";
+    if(telLimpio)conTel++;
+    h+='<div class="wa-item">'+cinBadge(a.cinturon,38)+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+a.nombre+'</div>'+
+      '<div style="font-size:11px;color:var(--muted)">'+(tel||"Sin tel")+'</div></div>'+
+      (waUrl?'<a href="'+waUrl+'" target="_blank" style="background:#25d366;border-radius:10px;padding:10px 12px;color:#fff;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0">📲 WA</a>':
+      '<span style="font-size:11px;color:var(--muted);flex-shrink:0">Sin tel</span>')+'</div>';
+  });
+  openModal("Enviar a "+conTel+" contactos",h);
+}
+
+// ── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDashboard(){
+  var act=DB.alumnos.filter(function(a){return a.estado==="Activo";});
+  var ninos=act.filter(function(a){return a.grupo==="ninos";}).length;
+  var jovenes=act.filter(function(a){return a.grupo==="jovenes";}).length;
+  // Pendientes de pago mes actual (solo cantidad, sin montos)
+  var key=ANO+"-"+MES;var reg=DB.pagos[key]||{};
+  var pend=act.filter(function(a){return !reg[a.id]||reg[a.id]==="N";}).length;
+  // Asistencia hoy
+  var asisHoy=DB.asistencia[HOY]||{};
+  var presHoy=Object.values(asisHoy).filter(function(v){return v==="P";}).length;
+  // Cumpleaños del mes
+  var bdays=DB.alumnos.filter(function(a){if(!a.nac)return false;var d=parseFecha(a.nac);return d&&d.getMonth()===MES;});
+  bdays.sort(function(a,b){return parseFecha(a.nac).getDate()-parseFecha(b.nac).getDate();});
+  // Candidatos a examen
+  var candidatos=act.filter(function(a){return calcRequisitosExamen(a).ok;});
+  // Próximo evento
+  var prox=DB.eventos.filter(function(e){return e.fecha>=HOY;}).sort(function(a,b){return a.fecha<b.fecha?-1:1;}).slice(0,3);
+  // Distribución por grado (top 5)
+  var distrib={};act.forEach(function(a){var c=a.cinturon||"Blanco";distrib[c]=(distrib[c]||0)+1;});
+  var distribArr=Object.keys(distrib).map(function(k){return{c:k,n:distrib[k]};}).sort(function(a,b){return b.n-a.n;}).slice(0,6);
+  var maxN=distribArr.length>0?Math.max.apply(null,distribArr.map(function(x){return x.n;})):1;
+
+  // Saludo personalizado
+  var hora=new Date().getHours();
+  var saludo=hora<12?"Buenos días":hora<19?"Buenas tardes":"Buenas noches";
+
+  var h=bannerSuscripcionHTML()+'<div class="dash-hero">'+
+    '<h2>'+saludo+', instructor</h2>'+
+    '<div class="big">'+sedeActual().nombre+'</div>'+
+    '<div class="sub">'+act.length+' alumnos activos · '+presHoy+' presentes hoy</div></div>'+
+
+    '<div class="stats-row" style="grid-template-columns:1fr 1fr">'+
+    '<div class="stat-box"><div class="stat-n">'+ninos+'</div><div class="stat-l">Niños</div></div>'+
+    '<div class="stat-box"><div class="stat-n">'+jovenes+'</div><div class="stat-l">Jóvenes / Adultos</div></div></div>'+
+
+    // Alertas (sin montos)
+    (pendientes&&pendientes.length>0?'<div class="alert-red" style="background:#3a1010;border:1px solid #e63946;cursor:pointer" onclick="goTab(\'inscripciones\')"><b>📝 '+pendientes.length+' inscripción(es) pendiente(s)</b> de revisar · <span style="color:var(--red);font-weight:700">Ver →</span></div>':'')+
+    (pend>0?'<div class="alert-red"><b>⚠ '+pend+' alumno(s) con cuota pendiente</b> este mes · <a onclick="goTab(\'pagos\')" style="color:var(--red);font-weight:700;cursor:pointer">Ver →</a></div>':'')+
+    (candidatos.length>0?'<div class="alert-green"><b>🎯 '+candidatos.length+' alumno(s) listo(s) para examen</b> · <a onclick="goTab(\'examenes\')" style="color:var(--green);font-weight:700;cursor:pointer">Ver →</a></div>':'')+
+
+    // Próximos eventos
+    '<div class="dash-section-title">Próximos eventos</div>';
+  if(prox.length===0){h+='<div class="dash-card" style="text-align:center;color:var(--muted)">Sin eventos programados</div>';}
+  else{
+    prox.forEach(function(e){
+      h+='<div class="evt-item tipo-'+(e.tipo||"otro").toLowerCase()+'" onclick="modalVerEvento(\''+e.id+'\')">'+
+        '<div class="evt-date">'+e.fecha+(e.hora?" · "+e.hora:"")+'</div>'+
+        '<div class="evt-title">'+e.titulo+'</div>'+
+        '<div class="evt-meta">'+e.tipo+(e.lugar?" · "+e.lugar:"")+'</div></div>';
+    });
+  }
+
+  // Cumpleaños del mes
+  h+='<div class="dash-section-title">🎂 Cumpleaños de '+MESES[MES]+'</div>';
+  if(bdays.length===0){h+='<div class="dash-card" style="text-align:center;color:var(--muted)">Sin cumpleaños este mes</div>';}
+  else{
+    h+='<div class="dash-card">';
+    bdays.forEach(function(a){
+      var dia=parseFecha(a.nac).getDate();
+      var hoyDia=new Date().getDate();
+      var esHoy=dia===hoyDia;
+      h+='<div class="bday-item">'+
+        '<div class="bday-emoji">'+(esHoy?"🎉":"🎂")+'</div>'+
+        '<div style="flex:1"><div style="font-weight:700;font-size:13px">'+a.nombre+'</div>'+
+        '<div style="font-size:11px;color:var(--muted)">Día '+dia+' · cumple '+(edad(a.nac)+(esHoy?0:1))+'</div></div>'+
+        (esHoy?'<span style="background:var(--gold);color:#222;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:800">¡HOY!</span>':'')+
+        '</div>';
+    });
+    h+='</div>';
+  }
+
+  // Distribución por cinturón
+  if(distribArr.length>0){
+    h+='<div class="dash-section-title">Distribución por cinturón</div>'+
+      '<div class="dash-card">';
+    distribArr.forEach(function(x){
+      var pct=Math.round(x.n/maxN*100);
+      h+='<div class="bar-row"><div class="lbl">'+x.c.replace("Negro ","").slice(0,8)+'</div>'+
+        '<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+(CIN_BG[x.c]||"#e63946")+'"></div></div>'+
+        '<div class="val">'+x.n+'</div></div>';
+    });
+    h+='</div>';
+  }
+
+  // Resumen alumnos
+  h+='<div class="dash-section-title">Resumen alumnos</div>'+
+    '<div class="stats-row" style="grid-template-columns:1fr 1fr 1fr">'+
+    '<div class="stat-box"><div class="stat-n">'+act.length+'</div><div class="stat-l">Activos</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:#f59e0b">'+ninos+'</div><div class="stat-l">Niños</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:var(--blue)">'+jovenes+'</div><div class="stat-l">Jóvenes</div></div></div>';
+
+  document.getElementById("content").innerHTML=h;
+}
+
+// ── RESPALDO / RESTAURAR ────────────────────────────────────────────────────
+function modalRespaldo(){
+  openModal("Respaldo y restauración",
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Exporta toda la información a un archivo JSON o restaura desde uno.</div>'+
+    '<button class="btn btn-green" onclick="exportarRespaldo()">📥 Descargar respaldo (JSON)</button>'+
+    '<div class="div"></div>'+
+    '<button class="btn btn-blue" onclick="document.getElementById(\'restore-file\').click()">📤 Restaurar desde archivo</button>'+
+    '<input type="file" id="restore-file" accept=".json" style="display:none" onchange="importarRespaldo(this)"/>'+
+    '<div class="alert-warn" style="font-size:12px;margin-top:14px"><b>⚠ Atención:</b> Restaurar reemplazará todos los datos actuales de esta sede.</div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-outline" style="width:100%" onclick="closeModal()">Cerrar</button></div>');
+}
+function exportarRespaldo(){
+  var data={
+    fecha:new Date().toISOString(),
+    sede:sedeActual(),
+    alumnos:DB.alumnos,
+    asistencia:DB.asistencia,
+    pagos:DB.pagos,
+    examenes:DB.examenes,
+    eventos:DB.eventos,
+    competencias:DB.competencias,
+    curriculum:DB.curriculum,
+    config:DB.config
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="TKD_"+(sedeActual().nombre||"sede").replace(/\s+/g,"_")+"_"+HOY+".json";
+  a.click();URL.revokeObjectURL(url);
+  toast("Respaldo descargado");
+}
+function importarRespaldo(input){
+  var f=input.files[0];if(!f)return;
+  if(!confirm("Esto reemplazará TODOS los datos actuales de esta sede con los del archivo. ¿Continuar?"))return;
+  var r=new FileReader();
+  r.onload=async function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      // Borrar todo lo actual y subir lo del JSON
+      sync(true);
+      // Sobrescribir alumnos (eliminar los actuales primero)
+      for(var i=0;i<DB.alumnos.length;i++){await fsDel(pref()+"alumnos",DB.alumnos[i].id);}
+      for(var i=0;i<DB.examenes.length;i++){await fsDel(pref()+"examenes",DB.examenes[i].id);}
+      for(var i=0;i<DB.eventos.length;i++){await fsDel(pref()+"eventos",DB.eventos[i].id);}
+      for(var i=0;i<DB.competencias.length;i++){await fsDel(pref()+"competencias",DB.competencias[i].id);}
+      // Subir nuevos
+      DB.alumnos=data.alumnos||[];
+      DB.asistencia=data.asistencia||{};
+      DB.pagos=data.pagos||{};
+      DB.examenes=data.examenes||[];
+      DB.eventos=data.eventos||[];
+      DB.competencias=data.competencias||[];
+      DB.curriculum=data.curriculum||{};
+      DB.config=data.config||{};
+      for(var i=0;i<DB.alumnos.length;i++)await saveAlumno(DB.alumnos[i]);
+      for(var i=0;i<DB.examenes.length;i++)await saveExamen(DB.examenes[i]);
+      for(var i=0;i<DB.eventos.length;i++)await saveEvento(DB.eventos[i]);
+      for(var i=0;i<DB.competencias.length;i++)await saveCompetencia(DB.competencias[i]);
+      await saveAsistencia();await savePagos();await saveCurriculum();await saveConfig();
+      sync(false);
+      closeModal();updateHeader();render();
+      toast("Respaldo restaurado");
+    }catch(err){sync(false);alert("Error al leer el archivo: "+err.message);}
+  };
+  r.readAsText(f);
+}
+
+// ── EXCEL (mantenido + nuevas hojas) ────────────────────────────────────────
+function exportarExcel(){
+  var wb=XLSX.utils.book_new();var sede=sedeActual();
+  // Alumnos
+  var ah=[["#","Sede","Grupo","Nombre","Fecha Nac","Edad","Ingreso","Cinturon","F. Cinturón","Estado","Cuota","Telefono","Apoderado","Tel Apoderado","Email","Sangre","Previsión","Alergias","Enfermedades","Medicamentos","Emergencia","Observaciones"]];
+  DB.alumnos.forEach(function(a,i){ah.push([i+1,sede.nombre,a.grupo==="ninos"?"Ninos":"Jovenes",a.nombre,a.nac,edad(a.nac),a.ingreso,a.cinturon,a.fechaCinturonActual||"",a.estado,a.cuota||0,a.tel,a.apodNombre||"",a.apodTel||"",a.email,a.sangre||"",a.prevision||"",a.alergias||"",a.enfermedades||"",a.medicamentos||"",a.emergencia||"",a.obs]);});
+  var ws1=XLSX.utils.aoa_to_sheet(ah);XLSX.utils.book_append_sheet(wb,ws1,"Alumnos");
+  // Pagos
+  var claves=Object.keys(DB.pagos).sort();
+  var ph=[["#","Grupo","Nombre","Cuota"].concat(claves.map(function(k){var p=k.split("-");return MESES[+p[1]]+" "+p[0];})).concat(["Total $"])];
+  DB.alumnos.filter(function(a){return a.estado==="Activo";}).forEach(function(a,i){
+    var fila=[i+1,a.grupo==="ninos"?"Ninos":"Jovenes",a.nombre,a.cuota||0];var tp=0;
+    claves.forEach(function(k){var est=(DB.pagos[k]||{})[a.id]||"N";var l=est==="OK"?"Pagado":est==="P"?"Parcial":"Pendiente";fila.push(l);if(est==="OK")tp+=a.cuota||0;if(est==="P")tp+=Math.round((a.cuota||0)/2);});
+    fila.push(tp);ph.push(fila);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ph),"Pagos");
+  // Asistencia
+  var fechas=Object.keys(DB.asistencia).sort();
+  var ash=[["#","Grupo","Nombre"].concat(fechas).concat(["Total","Porcentaje"])];
+  DB.alumnos.filter(function(a){return a.estado==="Activo";}).forEach(function(a,i){
+    var fila=[i+1,a.grupo==="ninos"?"Ninos":"Jovenes",a.nombre];var pres=0;
+    fechas.forEach(function(f){var est=(DB.asistencia[f]||{})[a.id]||"A";var l=est==="P"?"Presente":est==="T"?"Tardanza":est==="J"?"Justificado":"Ausente";fila.push(l);if(est==="P")pres++;});
+    fila.push(pres,fechas.length>0?Math.round(pres/fechas.length*100)+"%":"0%");ash.push(fila);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ash.length>1?ash:[ash[0],["Sin registros"]]),"Asistencia");
+  // Examenes
+  var eh=[["#","Grupo","Alumno","Cinturon actual","A obtener","Fecha","Nota Tecnica","Nota Actitud","Promedio","Resultado","Monto","Pago","Observaciones"]];
+  DB.examenes.forEach(function(ex,i){var a=DB.alumnos.find(function(x){return x.id==ex.alumnoId;});var prom=ex.notaTec&&ex.notaAct?((+ex.notaTec+(+ex.notaAct))/2).toFixed(1):"-";eh.push([i+1,a?(a.grupo==="ninos"?"Ninos":"Jovenes"):"",a?a.nombre:"",ex.cinturonActual,ex.cinturonObtener,ex.fecha,ex.notaTec||"-",ex.notaAct||"-",prom,ex.resultado,ex.montoPago||0,ex.pagado?"Pagado":"Pendiente",ex.obs]);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(eh.length>1?eh:[eh[0],["Sin examenes"]]),"Examenes");
+  // Eventos
+  var evh=[["#","Fecha","Hora","Tipo","Título","Lugar","Descripción"]];
+  DB.eventos.forEach(function(e,i){evh.push([i+1,e.fecha,e.hora||"",e.tipo,e.titulo,e.lugar||"",e.desc||""]);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(evh.length>1?evh:[evh[0],["Sin eventos"]]),"Eventos");
+  // Competencias
+  var coh=[["#","Fecha","Alumno","Torneo","Lugar","Modalidad","Categoría","Medalla","Posición","Observaciones"]];
+  DB.competencias.forEach(function(c,i){var a=DB.alumnos.find(function(x){return x.id==c.alumnoId;});coh.push([i+1,c.fecha,a?a.nombre:"",c.torneo,c.lugar||"",c.modalidad,c.categoria||"",c.medalla,c.posicion||"",c.obs||""]);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(coh.length>1?coh:[coh[0],["Sin competencias"]]),"Competencias");
+
+  var fecha=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,(sede.nombre||"TKD").replace(/\s+/g,"_")+"_"+fecha+".xlsx");
+  toast("Excel exportado");
+}
+
+// ── TABS / RENDER ───────────────────────────────────────────────────────────
+function goTab(t){
+  tab=t;
+  document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});
+  var tabEl=document.getElementById("tab-"+t);
+  if(tabEl)tabEl.classList.add("active");
+  render();
+}
+
+// ── TORNEOS (INSCRIPCIONES) ─────────────────────────────────────────────────
+let torneoActivo=null; // id del torneo abierto
+
+function renderTorneos(){
+  // Si hay un torneo abierto, mostrar la pantalla de inscripción
+  if(torneoActivo){
+    var t=DB.torneos.find(function(x){return x.id===torneoActivo;});
+    if(!t){torneoActivo=null;renderTorneos();return;}
+    renderTorneoDetalle(t);
+    return;
+  }
+
+  var lista=DB.torneos.slice().sort(function(a,b){return(b.fecha||"")<(a.fecha||"")?-1:1;});
+  var h='<div style="padding:14px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'+
+    '<h2 style="font-size:18px">🥋 Torneos</h2>'+
+    '<button class="btn btn-red" style="padding:8px 14px;font-size:12px" onclick="modalNuevoTorneo()">+ Nuevo torneo</button>'+
+    '</div>';
+
+  if(lista.length===0){
+    h+='<div class="card2" style="text-align:center;padding:40px 20px;color:var(--muted)">'+
+      '<div style="font-size:48px;margin-bottom:10px;opacity:0.5">🏆</div>'+
+      '<div style="font-weight:600;margin-bottom:6px">Aún no hay torneos</div>'+
+      '<div style="font-size:12px;margin-bottom:14px">Crea uno para inscribir a tus alumnos</div>'+
+      '<button class="btn btn-red" style="padding:10px 20px" onclick="modalNuevoTorneo()">+ Crear primer torneo</button>'+
+      '</div>';
+  } else {
+    lista.forEach(function(t){
+      var fechaTxt=t.fecha?new Date(t.fecha+"T12:00:00").toLocaleDateString("es-CL",{day:"2-digit",month:"short",year:"numeric"}):"Sin fecha";
+      var insK=(t.inscritosKyorugui||[]).length;
+      var insP=(t.inscritosPoomsae||[]).length;
+      h+='<div class="card2" style="margin-bottom:10px;cursor:pointer" onclick="abrirTorneo(\''+t.id+'\')">'+
+        '<div style="display:flex;gap:12px;align-items:center">'+
+          '<div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#e63946,#7f1d1d);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🥋</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-weight:700;font-size:14px">'+t.nombre+'</div>'+
+            '<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 '+fechaTxt+(t.lugar?' · 📍 '+t.lugar:'')+'</div>'+
+            '<div style="font-size:11px;color:var(--muted);margin-top:3px">⚔ '+insK+' Kyorugui · 🥋 '+insP+' Poomsae</div>'+
+          '</div>'+
+          '<div style="font-size:20px">›</div>'+
+        '</div>'+
+        '</div>';
+    });
+  }
+  h+='</div>';
+  document.getElementById("content").innerHTML=h;
+}
+
+function modalNuevoTorneo(t){
+  t=t||{};
+  var titulo=t.id?"Editar torneo":"Nuevo torneo";
+  openModal(titulo,
+    '<div class="field"><label>Nombre del torneo *</label><input id="t-nombre" value="'+(t.nombre||"")+'" placeholder="Ej: Copa Regional 2026"/></div>'+
+    '<div class="field"><label>Fecha *</label><input type="date" id="t-fecha" value="'+(t.fecha||"")+'"/></div>'+
+    '<div class="field"><label>Lugar</label><input id="t-lugar" value="'+(t.lugar||"")+'" placeholder="Ej: Polideportivo Paine"/></div>'+
+    '<div class="field"><label>Organizador</label><input id="t-org" value="'+(t.organizador||"")+'" placeholder="Federación, club, etc."/></div>'+
+    '<div class="field"><label>Notas</label><textarea id="t-notas" rows="2">'+(t.notas||"")+'</textarea></div>'+
+    '<div style="display:flex;gap:8px">'+
+      (t.id?'<button class="btn btn-outline-red" style="flex:1" onclick="eliminarTorneo(\''+t.id+'\')">🗑 Eliminar</button>':'')+
+      '<button class="btn btn-red" style="flex:2" onclick="guardarTorneo(\''+(t.id||"")+'\')">💾 Guardar</button>'+
+    '</div>'
+  );
+}
+
+async function guardarTorneo(id){
+  var g=function(k){var el=document.getElementById(k);return el?el.value:"";};
+  var nombre=g("t-nombre").trim();
+  if(!nombre){alert("Ingresa el nombre del torneo");return;}
+  var fecha=g("t-fecha");
+  if(!fecha){alert("Ingresa la fecha");return;}
+  var existente=id?DB.torneos.find(function(x){return x.id===id;}):null;
+  var t={
+    id:id||"t"+Date.now(),
+    nombre:nombre,
+    fecha:fecha,
+    lugar:g("t-lugar").trim(),
+    organizador:g("t-org").trim(),
+    notas:g("t-notas").trim(),
+    inscritosKyorugui:existente?existente.inscritosKyorugui||[]:[],
+    inscritosPoomsae:existente?existente.inscritosPoomsae||[]:[]
+  };
+  await saveTorneo(t);
+  if(existente){
+    Object.assign(existente,t);
+  } else {
+    DB.torneos.push(t);
+  }
+  closeModal();
+  renderTorneos();
+  toast("Torneo guardado","#22c55e");
+}
+
+async function eliminarTorneo(id){
+  if(!confirm("¿Eliminar este torneo? Se perderán todas las inscripciones."))return;
+  await delTorneo(id);
+  DB.torneos=DB.torneos.filter(function(x){return x.id!==id;});
+  closeModal();
+  torneoActivo=null;
+  renderTorneos();
+  toast("Torneo eliminado","#888");
+}
+
+function abrirTorneo(id){
+  torneoActivo=id;
+  renderTorneos();
+}
+
+function volverATorneos(){
+  torneoActivo=null;
+  renderTorneos();
+}
+
+function renderTorneoDetalle(t){
+  var insK=t.inscritosKyorugui||[];
+  var insP=t.inscritosPoomsae||[];
+
+  // Ordenar alumnos por nombre
+  var alumnos=DB.alumnos.slice().sort(function(a,b){return(a.nombre||"").localeCompare(b.nombre||"");});
+
+  var fechaTxt=t.fecha?new Date(t.fecha+"T12:00:00").toLocaleDateString("es-CL",{day:"2-digit",month:"long",year:"numeric"}):"";
+
+  var h='<div style="padding:14px">';
+  // Header del torneo
+  h+='<div style="background:linear-gradient(135deg,#1a0a0a,#2a0505);border:1px solid #e63946;border-radius:14px;padding:14px;margin-bottom:14px">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
+    '<button class="btn btn-outline" style="padding:6px 10px;font-size:11px" onclick="volverATorneos()">← Torneos</button>'+
+    '<button class="btn btn-outline" style="padding:6px 10px;font-size:11px" onclick="modalNuevoTorneo(DB.torneos.find(function(x){return x.id===\''+t.id+'\';}))">✏ Editar</button>'+
+    '</div>'+
+    '<div style="font-weight:800;font-size:17px;margin-bottom:4px">🥋 '+t.nombre+'</div>'+
+    '<div style="font-size:12px;color:#ffc1c1">📅 '+fechaTxt+(t.lugar?' · 📍 '+t.lugar:'')+'</div>'+
+    (t.organizador?'<div style="font-size:11px;color:var(--muted);margin-top:2px">Organiza: '+t.organizador+'</div>':'')+
+    '</div>';
+
+  // Resumen
+  h+='<div class="stats-row" style="grid-template-columns:1fr 1fr">'+
+    '<div class="stat-box"><div class="stat-n" style="color:#e63946">'+insK.length+'</div><div class="stat-l">⚔ Kyorugui</div></div>'+
+    '<div class="stat-box"><div class="stat-n" style="color:#f4c430">'+insP.length+'</div><div class="stat-l">🥋 Poomsae</div></div>'+
+    '</div>';
+
+  // Botón descargar
+  h+='<button class="btn btn-red" style="width:100%;margin-bottom:14px;padding:11px" onclick="descargarExcelTorneo(\''+t.id+'\')">📗 Descargar Excel</button>';
+
+  if(alumnos.length===0){
+    h+='<div class="card2" style="text-align:center;color:var(--muted);padding:30px">Aún no hay alumnos registrados</div>';
+  } else {
+    // Tabla de inscripción
+    h+='<div style="overflow-x:auto;margin:0 -14px;padding:0 14px">';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:540px">';
+    h+='<thead><tr style="background:#181818;color:var(--muted);text-align:left">'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Alumno</th>'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Cinturón</th>'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center">Edad</th>'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Cat. Peso</th>'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center">⚔</th>'+
+      '<th style="padding:8px 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center">🥋</th>'+
+      '</tr></thead><tbody>';
+    alumnos.forEach(function(a){
+      var ed=edad(a.nac);
+      var cat=categoriaPeso(a.peso,ed,a.grupo);
+      var inK=insK.indexOf(a.id)>-1;
+      var inP=insP.indexOf(a.id)>-1;
+      var bgRow=a.estado==="Activo"?"transparent":"#1a1a1a";
+      var op=a.estado==="Activo"?"1":"0.5";
+      h+='<tr style="border-bottom:1px solid #222;background:'+bgRow+';opacity:'+op+'">'+
+        '<td style="padding:8px 6px;font-weight:600">'+a.nombre+'</td>'+
+        '<td style="padding:8px 6px">'+(a.cinturon||"-")+'</td>'+
+        '<td style="padding:8px 6px;text-align:center">'+ed+'</td>'+
+        '<td style="padding:8px 6px;font-size:11px;color:'+(cat==="-"?"var(--muted)":"#f4c430")+'">'+cat+'</td>'+
+        '<td style="padding:8px 6px;text-align:center"><input type="checkbox" '+(inK?"checked":"")+' onchange="toggleInscripcion(\''+t.id+'\',\''+a.id+'\',\'K\',this.checked)"/></td>'+
+        '<td style="padding:8px 6px;text-align:center"><input type="checkbox" '+(inP?"checked":"")+' onchange="toggleInscripcion(\''+t.id+'\',\''+a.id+'\',\'P\',this.checked)"/></td>'+
+        '</tr>';
+    });
+    h+='</tbody></table></div>';
+
+    // Aviso de peso faltante
+    var sinPeso=alumnos.filter(function(a){return(insK.indexOf(a.id)>-1||insP.indexOf(a.id)>-1)&&(!a.peso||a.peso<=0);});
+    if(sinPeso.length>0){
+      h+='<div style="background:#3a2510;border:1px solid #f4c430;border-radius:10px;padding:12px;margin-top:14px;font-size:12px;color:#ffd97a">'+
+        '<b>⚠ '+sinPeso.length+' alumno(s) inscrito(s) sin peso registrado</b><br>'+
+        'Edítalos en la ficha del alumno para que aparezca su categoría de peso.'+
+        '</div>';
+    }
+  }
+
+  h+='</div>';
+  document.getElementById("content").innerHTML=h;
+}
+
+async function toggleInscripcion(torneoId,alumnoId,modalidad,checked){
+  var t=DB.torneos.find(function(x){return x.id===torneoId;});
+  if(!t)return;
+  var lista=modalidad==="K"?(t.inscritosKyorugui||[]):(t.inscritosPoomsae||[]);
+  if(checked){
+    if(lista.indexOf(alumnoId)===-1)lista.push(alumnoId);
+  } else {
+    var idx=lista.indexOf(alumnoId);
+    if(idx>-1)lista.splice(idx,1);
+  }
+  if(modalidad==="K")t.inscritosKyorugui=lista;
+  else t.inscritosPoomsae=lista;
+  await saveTorneo(t);
+  // Re-render para actualizar contador
+  renderTorneoDetalle(t);
+}
+
+async function descargarExcelTorneo(torneoId){
+  var t=DB.torneos.find(function(x){return x.id===torneoId;});
+  if(!t)return;
+  if(typeof XLSX==="undefined"){alert("Librería XLSX no cargada");return;}
+
+  var insK=t.inscritosKyorugui||[];
+  var insP=t.inscritosPoomsae||[];
+
+  if(insK.length===0&&insP.length===0){
+    alert("No hay alumnos inscritos. Marca al menos uno en Kyorugui o Poomsae.");
+    return;
+  }
+
+  function filaAlumno(a){
+    var ed=edad(a.nac);
+    var cat=categoriaPeso(a.peso,ed,a.grupo);
+    return{
+      "Nombre":a.nombre||"",
+      "RUT":a.rut||"",
+      "Cinturón":a.cinturon||"",
+      "Edad":ed,
+      "Peso (kg)":a.peso||"",
+      "Categoría de Peso":cat,
+      "Grupo":a.grupo==="ninos"?"Niños":"Jóvenes/Adultos",
+      "Apoderado":a.apodNombre||"",
+      "Tel. Apoderado":a.apodTel||""
+    };
+  }
+
+  var alumnosK=insK.map(function(id){return DB.alumnos.find(function(a){return a.id===id;});}).filter(Boolean).sort(function(a,b){return(a.nombre||"").localeCompare(b.nombre||"");});
+  var alumnosP=insP.map(function(id){return DB.alumnos.find(function(a){return a.id===id;});}).filter(Boolean).sort(function(a,b){return(a.nombre||"").localeCompare(b.nombre||"");});
+
+  var datosK=alumnosK.map(filaAlumno);
+  var datosP=alumnosP.map(filaAlumno);
+
+  var wb=XLSX.utils.book_new();
+
+  // Hoja Kyorugui
+  if(datosK.length>0){
+    var wsK=XLSX.utils.json_to_sheet(datosK);
+    wsK["!cols"]=[{wch:25},{wch:13},{wch:14},{wch:6},{wch:9},{wch:14},{wch:14},{wch:25},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,wsK,"Kyorugui");
+  } else {
+    var wsKEmpty=XLSX.utils.aoa_to_sheet([["Sin inscritos en Kyorugui"]]);
+    XLSX.utils.book_append_sheet(wb,wsKEmpty,"Kyorugui");
+  }
+
+  // Hoja Poomsae
+  if(datosP.length>0){
+    var wsP=XLSX.utils.json_to_sheet(datosP);
+    wsP["!cols"]=[{wch:25},{wch:13},{wch:14},{wch:6},{wch:9},{wch:14},{wch:14},{wch:25},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,wsP,"Poomsae");
+  } else {
+    var wsPEmpty=XLSX.utils.aoa_to_sheet([["Sin inscritos en Poomsae"]]);
+    XLSX.utils.book_append_sheet(wb,wsPEmpty,"Poomsae");
+  }
+
+  // Hoja resumen
+  var resumen=[
+    ["TORNEO",t.nombre],
+    ["Fecha",t.fecha||""],
+    ["Lugar",t.lugar||""],
+    ["Organizador",t.organizador||""],
+    [],
+    ["Total Kyorugui",datosK.length],
+    ["Total Poomsae",datosP.length],
+    [],
+    ["Generado",new Date().toLocaleString("es-CL")]
+  ];
+  var wsRes=XLSX.utils.aoa_to_sheet(resumen);
+  wsRes["!cols"]=[{wch:18},{wch:35}];
+  XLSX.utils.book_append_sheet(wb,wsRes,"Resumen");
+
+  var nombreArchivo=(t.nombre||"Torneo").replace(/[^a-zA-Z0-9\s]/g,"").replace(/\s+/g,"_")+"_"+(t.fecha||"").replace(/-/g,"")+".xlsx";
+  XLSX.writeFile(wb,nombreArchivo);
+  toast("✓ Excel descargado","#22c55e");
+}
+
+function render(){
+  if(tab==="dashboard")renderDashboard();
+  else if(tab==="alumnos")renderAlumnos();
+  else if(tab==="asistencia")renderAsistencia();
+  else if(tab==="pagos")renderPagos();
+  else if(tab==="examenes")renderExamenes();
+  else if(tab==="calendario")renderCalendario();
+  else if(tab==="curriculum")renderCurriculum();
+  else if(tab==="competencias")renderCompetencias();
+  else if(tab==="torneos")renderTorneos();
+  else if(tab==="comunicados")renderComunicados();
+  else if(tab==="inscripciones")renderInscripciones();
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+async function init(){
+  db=window.db;fsLib=window.fsLib;
+  auth=window.auth;authLib=window.authLib;
+  // Escuchar cambios de sesión: si hay usuario logueado entra a la app, si no muestra login
+  authLib.onAuthStateChanged(auth,async function(user){
+    if(user){
+      currentUser=user;
+      document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("loading-screen").style.display="flex";
+      await init2();
+    } else {
+      currentUser=null;
+      document.getElementById("loading-screen").style.display="none";
+      mostrarAuth("login");
+    }
+  });
+}
+
+// ─── SISTEMA DE SUSCRIPCIÓN / PRUEBA ───────────────────────────────────────
+let userSub=null; // {tipo, vence, activa}
+const DIAS_PRUEBA=7;
+const MS_DIA=24*60*60*1000;
+
+// Configuración de planes (puedes ajustar precios cuando quieras)
+const PLANES={
+  mensual:{nombre:"Plan Mensual",precio:15000,periodo:"al mes"},
+  anual:{nombre:"Plan Anual",precio:150000,periodo:"al año",ahorro:"2 meses gratis"}
+};
+const WHATSAPP_SOPORTE="56947526995"; // Tu número sin "+"
+const NOMBRE_ADMIN="Víctor Coppia";
+
+// Carga o crea la suscripción del usuario actual
+async function cargarOCrearSuscripcion(){
+  try{
+    var subDoc=await fsLib.getDoc(fsLib.doc(db,"escuelas/"+currentUser.uid+"/meta","suscripcion"));
+    if(subDoc.exists()){
+      userSub=subDoc.data();
+    } else {
+      // Primera vez → crear prueba de 7 días
+      var hoy=new Date();
+      var vence=new Date(hoy.getTime()+DIAS_PRUEBA*MS_DIA);
+      userSub={
+        tipo:"prueba",
+        fechaInicio:hoy.toISOString(),
+        vence:vence.toISOString(),
+        activa:true,
+        email:currentUser.email||""
+      };
+      await fsLib.setDoc(fsLib.doc(db,"escuelas/"+currentUser.uid+"/meta","suscripcion"),userSub);
+    }
+  }catch(e){
+    console.error("Error cargando suscripción:",e);
+    userSub={tipo:"prueba",vence:new Date(Date.now()+DIAS_PRUEBA*MS_DIA).toISOString(),activa:true};
+  }
+}
+
+// Devuelve días restantes (puede ser negativo si ya venció)
+function diasRestantes(){
+  if(!userSub)return DIAS_PRUEBA;
+  if(userSub.tipo==="vip"||userSub.tipo==="permanente")return 9999;
+  if(!userSub.activa)return -1;
+  var vence=new Date(userSub.vence);
+  var hoy=new Date();
+  return Math.ceil((vence-hoy)/MS_DIA);
+}
+
+// ¿La cuenta está vigente (puede escribir)?
+function suscripcionVigente(){
+  if(!userSub)return false;
+  if(userSub.tipo==="vip"||userSub.tipo==="permanente")return true;
+  if(!userSub.activa)return false;
+  return new Date(userSub.vence)>new Date();
+}
+
+// Banner visual en el dashboard según estado
+function bannerSuscripcionHTML(){
+  if(!userSub)return"";
+  if(userSub.tipo==="vip"||userSub.tipo==="permanente")return"";
+  var dias=diasRestantes();
+  if(dias>3)return""; // No mostrar si quedan más de 3 días
+  if(dias<=0){
+    return'<div style="background:#3a1010;border:2px solid #e63946;border-radius:12px;padding:16px;margin-bottom:14px;text-align:center">'+
+      '<div style="font-size:30px;margin-bottom:6px">🔒</div>'+
+      '<div style="font-weight:800;color:#e63946;margin-bottom:4px;font-size:15px">Tu periodo de prueba expiró</div>'+
+      '<div style="font-size:12px;color:#ffc1c1;margin-bottom:12px">La app está en modo solo lectura</div>'+
+      '<button class="btn btn-red" style="width:100%;padding:11px;font-size:13px;font-weight:700" onclick="modalPlanes()">💎 Ver planes y suscribirme</button>'+
+      '</div>';
+  }
+  if(dias===1){
+    return'<div style="background:#3a1010;border:1px solid #e63946;border-radius:10px;padding:12px;margin-bottom:14px">'+
+      '<div style="color:#ffc1c1;font-size:13px;margin-bottom:10px">'+
+      '<b>⚠ Último día de prueba</b><br>Tu acceso completo vence hoy.'+
+      '</div>'+
+      '<button class="btn btn-red" style="width:100%;padding:9px;font-size:12px" onclick="modalPlanes()">💎 Ver planes</button>'+
+      '</div>';
+  }
+  return'<div style="background:#3a2510;border:1px solid #f4c430;border-radius:10px;padding:12px;margin-bottom:14px">'+
+    '<div style="color:#ffd97a;font-size:13px;margin-bottom:10px">'+
+    '<b>⏰ Quedan '+dias+' días de prueba</b><br>Después la app pasará a modo solo lectura.'+
+    '</div>'+
+    '<button class="btn btn-outline-red" style="width:100%;padding:9px;font-size:12px" onclick="modalPlanes()">💎 Ver planes</button>'+
+    '</div>';
+}
+
+// Bloqueador: se llama antes de cualquier escritura crítica
+function bloquearSiVencido(accion){
+  if(suscripcionVigente())return false;
+  mostrarModalExpirado();
+  return true;
+}
+
+// Modal cuando se intenta escribir sin tener suscripción vigente
+function mostrarModalExpirado(){
+  openModal("🔒 Modo solo lectura",
+    '<div style="text-align:center;padding:6px">'+
+    '<div style="font-size:54px;margin-bottom:8px">🔒</div>'+
+    '<h3 style="color:#e63946;margin-bottom:8px">Tu periodo de prueba terminó</h3>'+
+    '<p style="color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:12px">'+
+    'Tus datos están a salvo, pero para seguir usando la app necesitas una suscripción.</p>'+
+    '<button class="btn btn-red" style="width:100%;padding:13px;font-size:14px;margin-bottom:8px" onclick="modalPlanes()">💎 Ver planes y suscribirme</button>'+
+    '<button class="btn btn-outline" style="width:100%" onclick="closeModal()">Entendido</button>'+
+    '</div>'
+  );
+}
+
+// Modal con los planes de suscripción y botones para contactarme
+function modalPlanes(){
+  var mensual=PLANES.mensual,anual=PLANES.anual;
+  var emailUsuario=(currentUser&&currentUser.email)||"";
+  var nombreUsuario=(currentUser&&currentUser.displayName)||"";
+
+  // Mensajes pre-armados para WhatsApp
+  var msgMensual="Hola "+NOMBRE_ADMIN+"! 👋\n\nQuiero suscribirme al *Plan Mensual* ($"+mensual.precio.toLocaleString("es-CL")+" CLP) de TKD Manager.\n\nMi cuenta:\n📧 "+emailUsuario+"\n👤 "+nombreUsuario+"\n\nPor favor envíame los datos para realizar la transferencia. ¡Gracias!";
+  var msgAnual="Hola "+NOMBRE_ADMIN+"! 👋\n\nQuiero suscribirme al *Plan Anual* ($"+anual.precio.toLocaleString("es-CL")+" CLP) de TKD Manager.\n\nMi cuenta:\n📧 "+emailUsuario+"\n👤 "+nombreUsuario+"\n\nPor favor envíame los datos para realizar la transferencia. ¡Gracias!";
+  var msgConsulta="Hola "+NOMBRE_ADMIN+"! Tengo una consulta sobre los planes de TKD Manager.";
+
+  var urlMensual="https://wa.me/"+WHATSAPP_SOPORTE+"?text="+encodeURIComponent(msgMensual);
+  var urlAnual="https://wa.me/"+WHATSAPP_SOPORTE+"?text="+encodeURIComponent(msgAnual);
+  var urlConsulta="https://wa.me/"+WHATSAPP_SOPORTE+"?text="+encodeURIComponent(msgConsulta);
+
+  openModal("💎 Planes de suscripción",
+    '<div style="text-align:center;padding-bottom:8px">'+
+
+    // Plan Mensual
+    '<div style="background:#181818;border:1px solid #2a2a2a;border-radius:14px;padding:18px;margin-bottom:12px;text-align:left">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div style="font-weight:800;font-size:16px">📅 '+mensual.nombre+'</div>'+
+        '<div style="background:#2a2a2a;padding:3px 10px;border-radius:10px;font-size:10px;color:var(--muted);font-weight:700">Flexible</div>'+
+      '</div>'+
+      '<div style="font-size:28px;font-weight:800;color:#e63946;margin-bottom:2px">$'+mensual.precio.toLocaleString("es-CL")+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">CLP '+mensual.periodo+'</div>'+
+      '<button class="btn btn-outline-red" style="width:100%;padding:12px;font-size:13px;font-weight:700" onclick="window.open(\''+urlMensual+'\',\'_blank\')">💬 Suscribirme - Mensual</button>'+
+    '</div>'+
+
+    // Plan Anual (destacado)
+    '<div style="background:linear-gradient(135deg,#1a0a0a,#2a0505);border:2px solid #e63946;border-radius:14px;padding:18px;margin-bottom:12px;text-align:left;position:relative">'+
+      '<div style="position:absolute;top:-10px;right:14px;background:#f4c430;color:#000;padding:3px 12px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:0.5px">✨ MEJOR OPCIÓN</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;margin-top:4px">'+
+        '<div style="font-weight:800;font-size:16px">🏆 '+anual.nombre+'</div>'+
+        '<div style="background:#22c55e22;color:#22c55e;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700">'+anual.ahorro+'</div>'+
+      '</div>'+
+      '<div style="font-size:28px;font-weight:800;color:#e63946;margin-bottom:2px">$'+anual.precio.toLocaleString("es-CL")+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">CLP '+anual.periodo+'</div>'+
+      '<div style="font-size:11px;color:#22c55e;margin-bottom:14px;font-weight:600">Equivale a solo $'+Math.round(anual.precio/12).toLocaleString("es-CL")+' / mes</div>'+
+      '<button class="btn btn-red" style="width:100%;padding:13px;font-size:14px;font-weight:800" onclick="window.open(\''+urlAnual+'\',\'_blank\')">💬 Suscribirme - Anual</button>'+
+    '</div>'+
+
+    // Qué incluyen
+    '<div class="card2" style="text-align:left;padding:14px;margin-bottom:12px">'+
+      '<div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">✅ Ambos planes incluyen</div>'+
+      '<div style="font-size:12px;line-height:1.7">'+
+        '✓ Alumnos ilimitados<br>'+
+        '✓ Control de asistencia<br>'+
+        '✓ Gestión de pagos<br>'+
+        '✓ Exámenes y cinturones<br>'+
+        '✓ Eventos y competencias<br>'+
+        '✓ Formulario de inscripción público<br>'+
+        '✓ Exportación a Excel<br>'+
+        '✓ Soporte por WhatsApp'+
+      '</div>'+
+    '</div>'+
+
+    // Info de pago
+    '<div style="background:#0a1a2a;border:1px solid #3b82f6;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;text-align:left;color:#a6c8ff">'+
+      '<b>💳 Cómo pagar:</b><br>'+
+      'Al tocar "Suscribirme", se abrirá WhatsApp para contactar al administrador. Él te enviará los datos para transferencia bancaria.'+
+    '</div>'+
+
+    '<button class="btn btn-outline" style="width:100%" onclick="window.open(\''+urlConsulta+'\',\'_blank\')">❓ Hacer una consulta</button>'+
+
+    '</div>'
+  );
+}
+
+async function init2(){
+  // 1. Cargar/crear suscripción ANTES que nada
+  await cargarOCrearSuscripcion();
+
+  // 2. Si es un usuario recién registrado, creamos su escuela inicial con el nombre que ingresó
+  try{
+    var sedesDoc=await fsLib.getDoc(fsLib.doc(db,"escuelas/"+currentUser.uid+"/meta","sedes"));
+    if(sedesDoc.exists()&&sedesDoc.data().lista&&sedesDoc.data().lista.length>0){
+      sedes=sedesDoc.data().lista;
+    } else {
+      var nombreEscuela=(pendingNewUser&&pendingNewUser.escuela)||"Mi Escuela";
+      sedes=[{id:"s1",nombre:nombreEscuela,logo:"",dias:[]}];
+      await saveSedes();
+      pendingNewUser=null;
+      setTimeout(function(){
+        toast("¡Bienvenido! Tienes "+DIAS_PRUEBA+" días de prueba gratis 🎁","#22c55e");
+      },1200);
+    }
+  } catch(e){
+    console.error("Error cargando sedes:",e);
+    sedes=[{id:"s1",nombre:"Mi Escuela",logo:"",dias:[]}];
+  }
+  sedeId=sedes[0].id;
+  await cargarTodo();
+  document.getElementById("loading-screen").style.display="none";
+  updateHeader();renderSedeBar();
+  actualizarEscuelaPublica();
+  cargarPendientes();
+  iniciarAutoRefresco();
+  goTab("dashboard");
+}
+
+window.addEventListener("firebase-ready",function(){init();});
+if(window.firebaseReady){init();}
+</script>
+
+</body>
+</html>
