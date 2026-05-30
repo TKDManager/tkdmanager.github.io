@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'tkd-v3.7-casco-real';
+const CACHE_VERSION = 'tkd-v3.8-30dias';
 const ASSETS=[
   './',
   './index.html',

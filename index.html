@@ -2575,7 +2575,7 @@ async function init(){
 
 // ─── SISTEMA DE SUSCRIPCIÓN / PRUEBA ───────────────────────────────────────
 let userSub=null; // {tipo, vence, activa}
-const DIAS_PRUEBA=7;
+const DIAS_PRUEBA=30;
 const MS_DIA=24*60*60*1000;
 
 // Configuración de planes (puedes ajustar precios cuando quieras)
@@ -2593,7 +2593,7 @@ async function cargarOCrearSuscripcion(){
     if(subDoc.exists()){
       userSub=subDoc.data();
     } else {
-      // Primera vez → crear prueba de 7 días
+      // Primera vez → crear prueba de 30 días
       var hoy=new Date();
       var vence=new Date(hoy.getTime()+DIAS_PRUEBA*MS_DIA);
       userSub={
