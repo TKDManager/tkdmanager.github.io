@@ -360,7 +360,33 @@ const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","
 const DIAS_SEMANA=["Lun","Mar","Mie","Jue","Vie","Sab","Dom"];
 const TIPOS_EVENTO=["Clase","Examen","Torneo","Seminario","Suspension","Otro"];
 const CAT_TECNICAS=["Poomsae","Pateadas","Manos","Defensa","Termino coreano","Teoria","Rompimiento","Combate"];
-const HOY=new Date().toISOString().slice(0,10);
+// === HELPER DE FECHA EN HORA CHILE (arregla bug zona horaria) ===
+function fechaHoyChile(){
+  // Retorna YYYY-MM-DD usando la hora LOCAL del usuario, NO UTC
+  var d=new Date();
+  var y=d.getFullYear();
+  var m=String(d.getMonth()+1).padStart(2,'0');
+  var dia=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dia;
+}
+function fechaISOChile(d){
+  // Convierte cualquier Date a YYYY-MM-DD usando hora LOCAL
+  if(!d) d=new Date();
+  if(typeof d==='string') d=new Date(d);
+  var y=d.getFullYear();
+  var m=String(d.getMonth()+1).padStart(2,'0');
+  var dia=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dia;
+}
+function timestampChile(){
+  // Retorna un string ISO con hora local de Chile (no UTC)
+  var d=new Date();
+  var tzOffset=-d.getTimezoneOffset()*60000;
+  return new Date(d.getTime()+tzOffset).toISOString().slice(0,-1);
+}
+// === FIN HELPER ===
+
+const HOY=fechaHoyChile();
 const MES=new Date().getMonth();
 const ANO=new Date().getFullYear();
 const AEST_RAW=["P","A","T","J"];
@@ -2151,7 +2177,7 @@ function modalRespaldo(){
 }
 function exportarRespaldo(){
   var data={
-    fecha:new Date().toISOString(),
+    fecha:timestampChile(),
     sede:sedeActual(),
     alumnos:DB.alumnos,
     asistencia:DB.asistencia,
@@ -2243,7 +2269,7 @@ function exportarExcel(){
   DB.competencias.forEach(function(c,i){var a=DB.alumnos.find(function(x){return x.id==c.alumnoId;});coh.push([i+1,c.fecha,a?a.nombre:"",c.torneo,c.lugar||"",c.modalidad,c.categoria||"",c.medalla,c.posicion||"",c.obs||""]);});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(coh.length>1?coh:[coh[0],["Sin competencias"]]),"Competencias");
 
-  var fecha=new Date().toISOString().slice(0,10);
+  var fecha=fechaHoyChile();
   XLSX.writeFile(wb,(sede.nombre||"TKD").replace(/\s+/g,"_")+"_"+fecha+".xlsx");
   toast("Excel exportado");
 }

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'tkd-v3.8-30dias';
+const CACHE_VERSION = 'tkd-v3.9-fix-fechas';
 const ASSETS=[
   './',
   './index.html',
